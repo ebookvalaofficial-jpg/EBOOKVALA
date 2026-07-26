@@ -1,0 +1,787 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String                  @id @default(cuid())
+  name                    String?
+  email                   String                  @unique
+  password                String?
+  emailVerified           DateTime?
+  image                   String?
+  bio                     String?
+  role                    String                  @default("USER") // USER, ADMIN, SUPER_ADMIN
+  isBanned                Boolean                 @default(false)
+  isAuthor                Boolean                 @default(false)
+  authorApplicationStatus String                  @default("NONE") // NONE, PENDING, APPROVED, REJECTED
+  provider                String?                 @default("credentials")
+  accounts                Account[]
+  sessions                Session[]
+  reviews                 Review[]
+  wishlist                Wishlist[]
+  cartItems               CartItem[]
+  orders                  Order[]
+  subscriptions           Subscription[]
+  purchases               Purchase[]
+  readingProgress         ReadingProgress[]
+  bookmarks               Bookmark[]
+  highlights              Highlight[]
+  readingStreak           ReadingStreak?
+  userAchievements        UserAchievement[]
+  notificationPreference  NotificationPreference?
+  adminActionLogs         AdminActionLog[]
+  aiChatSessions          AIChatSession[]
+  quizAttempts            QuizAttempt[]
+  aiUsageLogs             AIUsageLog[]
+  authorProfile           Author?
+  authorApplications      AuthorApplication[]     @relation("UserApplications")
+  reviewedApplications    AuthorApplication[]     @relation("AdminReviewedApplications")
+  authorBookSubmissions   AuthorBookSubmission[]
+  royaltyLedgerEntries    RoyaltyLedger[]
+  payoutRequests          PayoutRequest[]
+  following               Follow[]                @relation("UserFollowers")
+  followers               Follow[]                @relation("UserFollowing")
+  discussions             Discussion[]            @relation("UserDiscussions")
+  discussionReplies       DiscussionReply[]
+  reactions               Reaction[]
+  createdClubs            ReadingClub[]           @relation("UserCreatedClubs")
+  clubMemberships         ReadingClubMember[]
+  activityFeedItems       ActivityFeedItem[]
+  reportsSubmitted        Report[]                @relation("UserReports")
+  reportsReviewed         Report[]                @relation("AdminReviewedReports")
+  authorBookSubmissionCount Int?                @default(0)
+  onboardingCompletedAt   DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model Author {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  bio        String?
+  avatarUrl  String?
+  booksCount Int      @default(0)
+  userId     String?  @unique
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  books      Book[]
+  createdAt  DateTime @default(now())
+}
+
+model Category {
+  id                    String                 @id @default(cuid())
+  slug                  String                 @unique
+  name                  String
+  icon                  String?
+  bookCount             Int                    @default(0)
+  description           String?
+  books                 Book[]
+  authorBookSubmissions AuthorBookSubmission[]
+  discussions           Discussion[]
+  createdAt             DateTime               @default(now())
+}
+
+model Book {
+  id                   String            @id @default(cuid())
+  slug                 String            @unique
+  title                String
+  authorId             String
+  author               Author            @relation(fields: [authorId], references: [id])
+  description          String
+  coverImageUrl        String
+  categoryId           String
+  category             Category          @relation(fields: [categoryId], references: [id])
+  price                Int
+  originalPrice        Int?
+  discountPercent      Int?
+  rating               Float             @default(0.0)
+  reviewCount          Int               @default(0)
+  pageCount            Int               @default(200)
+  language             String            @default("English")
+  format               String            @default("EPUB, PDF")
+  isBestseller         Boolean           @default(false)
+  isFeatured           Boolean           @default(false)
+  isTrending           Boolean           @default(false)
+  isDeleted            Boolean           @default(false)
+  reviews              Review[]
+  wishlists            Wishlist[]
+  cartItems            CartItem[]
+  orderItems           OrderItem[]
+  purchases            Purchase[]
+  chapters             Chapter[]
+  readingProgress      ReadingProgress[]
+  bookmarks            Bookmark[]
+  highlights           Highlight[]
+  aiChatSessions       AIChatSession[]
+  aiSummaries          AISummary[]
+  flashcards           Flashcard[]
+  quizQuestions        QuizQuestion[]
+  quizAttempts         QuizAttempt[]
+  royaltyLedgerEntries RoyaltyLedger[]
+  discussions          Discussion[]
+  readingClubs         ReadingClub[]
+  publishedAt          DateTime          @default(now())
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isBestseller])
+  @@index([isFeatured])
+  @@index([isTrending])
+  @@index([createdAt])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bookId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bookId])
+}
+
+model Order {
+  id                String          @id @default(cuid())
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String          @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  status            String          @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  amount            Int // amount in paise
+  currency          String          @default("INR")
+  promoCodeApplied  String?
+  discountAmount    Int?            @default(0)
+  items             OrderItem[]
+  purchases         Purchase[]
+  royaltyEntries    RoyaltyLedger[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookId    String?
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  title     String
+  price     Int
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id                     String    @id @default(cuid())
+  userId                 String    @unique
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                   String    @default("FREE")
+  status                 String    @default("ACTIVE")
+  razorpaySubscriptionId String?   @unique
+  currentPeriodStart     DateTime? @default(now())
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+model PromoCode {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  discountType   String    @default("PERCENT")
+  discountValue  Int
+  minOrderAmount Int?      @default(0)
+  maxUses        Int?
+  usedCount      Int       @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+}
+
+model Purchase {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId      String
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  purchasedAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+}
+
+model Chapter {
+  id         String      @id @default(cuid())
+  bookId     String
+  book       Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  order      Int
+  title      String
+  content    String
+  wordCount  Int         @default(0)
+  createdAt  DateTime    @default(now())
+  bookmarks  Bookmark[]
+  highlights Highlight[]
+}
+
+model ReadingProgress {
+  id                      String   @id @default(cuid())
+  userId                  String
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId                  String
+  book                    Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  currentChapterId        String?
+  scrollPositionPercent   Float    @default(0.0)
+  percentComplete         Float    @default(0.0)
+  lastReadAt              DateTime @default(now())
+  totalReadingTimeSeconds Int      @default(0)
+  streakContribution      Boolean  @default(false)
+
+  @@unique([userId, bookId])
+}
+
+model Bookmark {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId                String
+  book                  Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId             String
+  chapter               Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  scrollPositionPercent Float    @default(0.0)
+  label                 String?
+  createdAt             DateTime @default(now())
+}
+
+model Highlight {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId       String
+  book         Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId    String
+  chapter      Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  selectedText String
+  color        String   @default("YELLOW")
+  note         String?
+  createdAt    DateTime @default(now())
+}
+
+model ReadingStreak {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak  Int      @default(1)
+  longestStreak  Int      @default(1)
+  lastActiveDate DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Achievement {
+  id                  String            @id @default(cuid())
+  key                 String            @unique
+  title               String
+  description         String
+  iconName            String
+  criteriaDescription String
+  userAchievements    UserAchievement[]
+  createdAt           DateTime          @default(now())
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailNewReleases      Boolean  @default(true)
+  emailReadingReminders Boolean  @default(true)
+  emailPromotions       Boolean  @default(false)
+  emailOrderReceipts    Boolean  @default(true)
+  pushEnabled           Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model AdminActionLog {
+  id          String   @id @default(cuid())
+  adminUserId String
+  adminUser   User     @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  action      String
+  targetType  String
+  targetId    String
+  details     String?
+  createdAt   DateTime @default(now())
+}
+
+model AIChatSession {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book            @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  messages  AIChatMessage[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([userId, bookId])
+}
+
+model AIChatMessage {
+  id        String        @id @default(cuid())
+  sessionId String
+  session   AIChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String
+  content   String
+  createdAt DateTime      @default(now())
+}
+
+model AISummary {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId String?
+  content   String
+  createdAt DateTime @default(now())
+
+  @@unique([bookId, chapterId])
+}
+
+model Flashcard {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId String?
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+}
+
+model QuizQuestion {
+  id                 String   @id @default(cuid())
+  bookId             String
+  book               Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId          String?
+  question           String
+  options            String
+  correctAnswerIndex Int
+  explanation        String
+  createdAt          DateTime @default(now())
+}
+
+model QuizAttempt {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId         String
+  book           Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  score          Int
+  totalQuestions Int
+  completedAt    DateTime @default(now())
+}
+
+model AIUsageLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature   String
+  createdAt DateTime @default(now())
+}
+
+// ═══════════════════════════════════════
+// AUTHOR MARKETPLACE MODELS
+// ═══════════════════════════════════════
+
+model AuthorApplication {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation("UserApplications", fields: [userId], references: [id], onDelete: Cascade)
+  penName           String
+  bio               String
+  sampleWorkUrl     String?
+  sampleWorkText    String?
+  socialLinks       String?
+  status            String    @default("PENDING")
+  reviewedByAdminId String?
+  reviewedByAdmin   User?     @relation("AdminReviewedApplications", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewNote        String?
+  createdAt         DateTime  @default(now())
+  reviewedAt        DateTime?
+}
+
+model AuthorBookSubmission {
+  id                 String    @id @default(cuid())
+  authorUserId       String
+  authorUser         User      @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  bookId             String?   @unique
+  title              String
+  description        String
+  categoryId         String
+  category           Category  @relation(fields: [categoryId], references: [id])
+  coverImageUrl      String
+  price              Int
+  manuscriptChapters String
+  status             String    @default("DRAFT")
+  rejectionReason    String?
+  submittedAt        DateTime?
+  reviewedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([authorUserId])
+  @@index([status])
+}
+
+model RoyaltyLedger {
+  id            String   @id @default(cuid())
+  authorUserId  String
+  authorUser    User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  bookId        String
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  saleAmount    Int
+  royaltyRate   Float    @default(0.70)
+  royaltyAmount Int
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+
+  @@index([authorUserId])
+  @@index([orderId])
+  @@index([bookId])
+}
+
+model PayoutRequest {
+  id           String    @id @default(cuid())
+  authorUserId String
+  authorUser   User      @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  amount       Int
+  status       String    @default("REQUESTED")
+  adminNote    String?
+  requestedAt  DateTime  @default(now())
+  processedAt  DateTime?
+
+  @@index([authorUserId])
+  @@index([status])
+}
+
+// ═══════════════════════════════════════
+// COMMUNITY SYSTEM MODELS
+// ═══════════════════════════════════════
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model Discussion {
+  id           String            @id @default(cuid())
+  bookId       String?
+  book         Book?             @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  categoryId   String?
+  category     Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  authorUserId String
+  authorUser   User              @relation("UserDiscussions", fields: [authorUserId], references: [id], onDelete: Cascade)
+  title        String
+  body         String
+  isPinned     Boolean           @default(false)
+  isLocked     Boolean           @default(false)
+  viewCount    Int               @default(0)
+  replies      DiscussionReply[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([bookId])
+  @@index([categoryId])
+  @@index([authorUserId])
+  @@index([createdAt])
+}
+
+model DiscussionReply {
+  id            String            @id @default(cuid())
+  discussionId  String
+  discussion    Discussion        @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body          String
+  parentReplyId String?
+  parentReply   DiscussionReply?  @relation("NestedReplies", fields: [parentReplyId], references: [id], onDelete: SetNull)
+  childReplies  DiscussionReply[] @relation("NestedReplies")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([discussionId])
+  @@index([userId])
+  @@index([parentReplyId])
+}
+
+model Reaction {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String
+  targetId   String
+  type       String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+}
+
+model ReadingClub {
+  id              String              @id @default(cuid())
+  name            String
+  description     String
+  coverImageUrl   String?
+  createdByUserId String
+  createdByUser   User                @relation("UserCreatedClubs", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  currentBookId   String?
+  currentBook     Book?               @relation(fields: [currentBookId], references: [id], onDelete: SetNull)
+  isPublic        Boolean             @default(true)
+  memberLimit     Int?
+  members         ReadingClubMember[]
+  createdAt       DateTime            @default(now())
+
+  @@index([createdByUserId])
+  @@index([currentBookId])
+}
+
+model ReadingClubMember {
+  id       String      @id @default(cuid())
+  clubId   String
+  club     ReadingClub @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String      @default("MEMBER")
+  joinedAt DateTime    @default(now())
+
+  @@unique([clubId, userId])
+  @@index([userId])
+}
+
+model ActivityFeedItem {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String
+  targetType String?
+  targetId   String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Report {
+  id                String    @id @default(cuid())
+  reporterId        String
+  reporter          User      @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType        String
+  targetId          String
+  reason            String
+  details           String?
+  status            String    @default("PENDING")
+  reviewedByAdminId String?
+  reviewedByAdmin   User?     @relation("AdminReviewedReports", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  createdAt         DateTime  @default(now())
+  reviewedAt        DateTime?
+
+  @@index([status])
+  @@index([reporterId])
+  @@index([targetType, targetId])
+}
+
+// ═══════════════════════════════════════
+// CONTACT MESSAGE MODEL
+// ═══════════════════════════════════════
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("NEW") // NEW, READ, RESPONDED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ═══════════════════════════════════════
+// DMCA REQUEST MODEL
+// ═══════════════════════════════════════
+
+model DmcaRequest {
+  id               String   @id @default(cuid())
+  name             String
+  email            String
+  copyrightedWork  String
+  infringingUrl    String
+  statement        String
+  signature        String
+  status           String   @default("PENDING") // PENDING, REVIEWED, REJECTED, RESOLVED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ═══════════════════════════════════════
+// PROBLEM REPORT MODEL
+// ═══════════════════════════════════════
+
+model ProblemReport {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?
+  issueType     String
+  description   String
+  screenshotUrl String?
+  browserInfo   String?
+  status        String   @default("PENDING") // PENDING, INVESTIGATING, RESOLVED, CLOSED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ═══════════════════════════════════════
+// FEEDBACK MODEL
+// ═══════════════════════════════════════
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?
+  rating    Int
+  comments  String
+  createdAt DateTime @default(now())
+
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// ═══════════════════════════════════════
+// SITE SETTINGS MODEL
+// ═══════════════════════════════════════
+
+model SiteSetting {
+  id              String   @id @default("default")
+  siteName        String   @default("EbookVala")
+  supportEmail    String   @default("support@ebookvala.com")
+  maintenanceMode Boolean  @default(false)
+  twitterUrl      String?  @default("https://twitter.com/ebookvala")
+  facebookUrl     String?  @default("https://facebook.com/ebookvala")
+  instagramUrl    String?  @default("https://instagram.com/ebookvala")
+  linkedinUrl     String?  @default("https://linkedin.com/company/ebookvala")
+  updatedAt       DateTime @updatedAt
+}

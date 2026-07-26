@@ -1,0 +1,225 @@
+@import "tailwindcss";
+
+:root {
+  --bg-background: #FFFFFF;
+  --bg-surface: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --primary-blue: #2563EB;
+  --secondary-purple: #4F46E5;
+  --accent-gold: #FACC15;
+  --text-heading: #111827;
+  --text-body: #475569;
+  --text-muted: #94A3B8;
+  --border-color: #E5E7EB;
+  --status-success: #22C55E;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --status-info: #3B82F6;
+}
+
+.dark {
+  --bg-background: #09090B;
+  --bg-surface: #111827;
+  --bg-card: #18181B;
+  --primary-blue: #3B82F6;
+  --secondary-purple: #8B5CF6;
+  --accent-gold: #FACC15;
+  --text-heading: #FFFFFF;
+  --text-body: #D4D4D8;
+  --text-muted: #A1A1AA;
+  --border-color: #27272A;
+  --status-success: #22C55E;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --status-info: #60A5FA;
+}
+
+@theme {
+  --font-montserrat: var(--font-montserrat), sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
+  --font-space-grotesk: var(--font-space-grotesk), monospace;
+  --font-edu-hand: var(--font-edu-hand), "Edu VIC WA NT Hand", cursive;
+  --font-merriweather: var(--font-merriweather), "Merriweather", serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  background-color: var(--bg-background);
+  color: var(--text-body);
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Touch Target Minimum (44px x 44px for key interactive elements on mobile) */
+@media (max-width: 768px) {
+  button, a.btn, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+}
+
+/* Prevent accidental pull-to-refresh inside Reader / Modals */
+.prevent-pull-to-refresh {
+  overscroll-behavior-y: contain;
+}
+
+/* Typography Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat), sans-serif;
+  color: var(--text-heading);
+}
+
+.font-stats {
+  font-family: var(--font-space-grotesk), monospace;
+}
+
+.font-edu-hand {
+  font-family: var(--font-edu-hand), "Edu VIC WA NT Hand", cursive;
+}
+
+.font-merriweather {
+  font-family: var(--font-merriweather), "Merriweather", serif;
+}
+
+/* Custom Design System Helper Classes */
+.bg-theme-bg { background-color: var(--bg-background); }
+.bg-theme-surface { background-color: var(--bg-surface); }
+.bg-theme-card { background-color: var(--bg-card); }
+.text-theme-heading { color: var(--text-heading); }
+.text-theme-body { color: var(--text-body); }
+.text-theme-muted { color: var(--text-muted); }
+.border-theme { border-color: var(--border-color); }
+
+.bg-primary-blue { background-color: var(--primary-blue); }
+.text-primary-blue { color: var(--primary-blue); }
+.bg-secondary-purple { background-color: var(--secondary-purple); }
+.text-secondary-purple { color: var(--secondary-purple); }
+.bg-accent-gold { background-color: var(--accent-gold); }
+.text-accent-gold { color: var(--accent-gold); }
+
+/* Glassmorphism Styles */
+.glass-nav {
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dark .glass-nav {
+  background-color: rgba(9, 9, 11, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+}
+
+.dark .glass-card {
+  background: rgba(24, 24, 27, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+}
+
+/* Gradient Utility Helpers */
+.brand-gradient-text {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #FACC15, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-gradient-bg {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+}
+
+.brand-gradient-glow {
+  box-shadow: 0 0 25px rgba(37, 99, 235, 0.35);
+}
+
+.dark .brand-gradient-glow {
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.45);
+}
+
+/* Smooth Scroll support */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Hide scrollbar for clean marquee */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Keyframe Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
