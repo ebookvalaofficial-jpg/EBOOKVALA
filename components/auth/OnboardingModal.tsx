@@ -11,12 +11,14 @@ export default function OnboardingModal() {
   const router = RouterHook();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<'READER' | 'AUTHOR'>('READER');
+  const [selectedRole, setSelectedRole] = useState<'READER' | 'AUTHOR' | 'BOTH'>('READER');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Don't show modal on auth pages or admin pages
+    // Don't show modal on auth pages, admin pages, or for ADMIN/SUPER_ADMIN users
     if (status !== 'authenticated' || !session?.user) return;
+    const userRole = (session?.user as { role?: string })?.role;
+    if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') return;
     if (pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/admin')) return;
 
     let isMounted = true;
@@ -40,13 +42,13 @@ export default function OnboardingModal() {
     };
   }, [status, session, pathname]);
 
-  const handleCompleteOnboarding = async (choice: 'READER' | 'AUTHOR' | 'SKIP') => {
+  const handleCompleteOnboarding = async (choice: 'READER' | 'AUTHOR' | 'BOTH' | 'SKIP') => {
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/user/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ choice }),
+        body: JSON.stringify({ choice: choice === 'BOTH' ? 'AUTHOR' : choice }),
       });
 
       const data = await res.json();
@@ -73,7 +75,7 @@ export default function OnboardingModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+          className="fixed inset-0 bg-slate-950/85 backdrop-blur-md"
         />
 
         {/* Modal Card */}
@@ -101,35 +103,31 @@ export default function OnboardingModal() {
           </div>
 
           {/* Role Choice Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* READER CARD */}
             <div
               onClick={() => setSelectedRole('READER')}
-              className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${
+              className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 group ${
                 selectedRole === 'READER'
                   ? 'bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-500/10'
                   : 'bg-slate-800/50 border-slate-700/80 hover:border-slate-600'
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
-                  <BookOpen className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                  <BookOpen className="w-4 h-4" />
                 </div>
-
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
                   selectedRole === 'READER' ? 'border-blue-500 bg-blue-500 text-white' : 'border-slate-600'
                 }`}>
-                  {selectedRole === 'READER' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                  {selectedRole === 'READER' && <CheckCircle2 className="w-3 h-3" />}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-extrabold text-base text-white font-montserrat">I&apos;m a Reader</h3>
-                  <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">Default</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Browse, buy, and read books. Access AI reading assistants, audiobooks, and community book clubs.
+                <h3 className="font-extrabold text-sm text-white font-montserrat">Reader</h3>
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Read, buy books & use AI assistants.
                 </p>
               </div>
             </div>
@@ -137,31 +135,55 @@ export default function OnboardingModal() {
             {/* AUTHOR CARD */}
             <div
               onClick={() => setSelectedRole('AUTHOR')}
-              className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${
+              className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 group ${
                 selectedRole === 'AUTHOR'
                   ? 'bg-purple-600/10 border-purple-500 shadow-lg shadow-purple-500/10'
                   : 'bg-slate-800/50 border-slate-700/80 hover:border-slate-600'
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
-                  <PenTool className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                  <PenTool className="w-4 h-4" />
                 </div>
-
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
                   selectedRole === 'AUTHOR' ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-600'
                 }`}>
-                  {selectedRole === 'AUTHOR' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                  {selectedRole === 'AUTHOR' && <CheckCircle2 className="w-3 h-3" />}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-extrabold text-base text-white font-montserrat">I&apos;m an Author</h3>
-                  <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md">Publish & Earn</span>
+                <h3 className="font-extrabold text-sm text-white font-montserrat">Author</h3>
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Publish eBooks & earn royalties.
+                </p>
+              </div>
+            </div>
+
+            {/* BOTH CARD */}
+            <div
+              onClick={() => setSelectedRole('BOTH')}
+              className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 group ${
+                selectedRole === 'BOTH'
+                  ? 'bg-emerald-600/10 border-emerald-500 shadow-lg shadow-emerald-500/10'
+                  : 'bg-slate-800/50 border-slate-700/80 hover:border-slate-600'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                  <Sparkles className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Publish and sell your own eBooks, view real-time royalty analytics, and reach thousands of readers.
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                  selectedRole === 'BOTH' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-600'
+                }`}>
+                  {selectedRole === 'BOTH' && <CheckCircle2 className="w-3 h-3" />}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-sm text-white font-montserrat">Both</h3>
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Full access as Reader & Author.
                 </p>
               </div>
             </div>

@@ -362,20 +362,48 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute right-0 mt-3 w-56 bg-theme-card border border-theme rounded-2xl shadow-2xl p-3 z-50 glass-card space-y-1"
+                        className="absolute right-0 mt-3 w-60 bg-slate-900 dark:bg-slate-950 border border-slate-700/90 rounded-2xl shadow-2xl p-3 z-[100] space-y-1 text-white"
                       >
-                        <div className="p-2 border-b border-theme mb-2">
-                          <p className="text-xs font-bold text-theme-heading truncate">
-                            {session.user.name || 'Account'}
+                        <div className="p-2 border-b border-slate-800 mb-1">
+                          <p className="text-xs font-extrabold text-white truncate flex items-center justify-between">
+                            <span>{session.user.name || 'Account'}</span>
+                            {((session.user as any)?.role === 'ADMIN' || (session.user as any)?.role === 'SUPER_ADMIN') && (
+                              <span className="text-[9px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-1.5 py-0.5 rounded">
+                                ADMIN
+                              </span>
+                            )}
                           </p>
-                          <p className="text-[11px] text-theme-muted truncate">
+                          <p className="text-[11px] text-slate-400 truncate">
                             {session.user.email}
                           </p>
                         </div>
+
+                        {((session.user as any)?.role === 'ADMIN' || (session.user as any)?.role === 'SUPER_ADMIN') && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 rounded-xl transition-colors"
+                          >
+                            <Zap className="w-4 h-4 text-amber-400" />
+                            <span>Admin Dashboard</span>
+                          </Link>
+                        )}
+
+                        {((session.user as any)?.isAuthor || (session.user as any)?.role === 'AUTHOR') && (
+                          <Link
+                            href="/author"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-purple-400 bg-purple-400/10 hover:bg-purple-400/20 border border-purple-400/20 rounded-xl transition-colors"
+                          >
+                            <Sparkles className="w-4 h-4 text-purple-400" />
+                            <span>Author Studio</span>
+                          </Link>
+                        )}
+
                         <Link
                           href="/books"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-theme-heading hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
                         >
                           <BookOpen className="w-4 h-4 text-primary-blue" />
                           <span>eBooks Store</span>
@@ -383,7 +411,7 @@ export default function Navbar() {
                         <Link
                           href="/wishlist"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-theme-heading hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
                         >
                           <Heart className="w-4 h-4 text-rose-500" />
                           <span>Saved Wishlist</span>
@@ -391,7 +419,7 @@ export default function Navbar() {
                         <Link
                           href="/cart"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-theme-heading hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
                         >
                           <ShoppingCart className="w-4 h-4 text-emerald-500" />
                           <span>Shopping Cart ({cartCount})</span>
@@ -399,7 +427,7 @@ export default function Navbar() {
                         <Link
                           href="/account/orders"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-theme-heading hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
                         >
                           <Zap className="w-4 h-4 text-indigo-500" />
                           <span>My Orders & Invoices</span>
@@ -407,18 +435,18 @@ export default function Navbar() {
                         <Link
                           href="/account/subscription"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-theme-heading hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
                         >
                           <Sparkles className="w-4 h-4 text-amber-500" />
                           <span>My Subscription</span>
                         </Link>
-                        <div className="pt-1 border-t border-theme">
+                        <div className="pt-1 border-t border-slate-800">
                           <button
                             onClick={() => {
                               setIsUserMenuOpen(false);
                               signOut({ callbackUrl: '/' });
                             }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
                           >
                             <LogOut className="w-4 h-4" />
                             <span>Sign Out</span>

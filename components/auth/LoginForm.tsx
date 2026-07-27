@@ -80,10 +80,8 @@ export default function LoginForm() {
         setIsLoading(false);
       } else {
         setServerSuccess('Signed in successfully! Redirecting...');
-        setTimeout(() => {
-          router.push(callbackUrl);
-          router.refresh();
-        }, 800);
+        router.push(callbackUrl);
+        router.refresh();
       }
     } catch (err: unknown) {
       console.error('[LOGIN SUBMIT ERROR]:', err);
