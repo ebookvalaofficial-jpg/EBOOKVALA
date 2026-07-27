@@ -136,7 +136,7 @@ export default function ContactPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Prince Gajera"
+                      placeholder="John Doe"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-4 py-3 rounded-2xl bg-theme-surface border border-theme text-sm text-theme-heading placeholder:text-theme-muted focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
@@ -150,7 +150,7 @@ export default function ContactPage() {
                     <input
                       type="email"
                       required
-                      placeholder="prince@ebookvala.com"
+                      placeholder="john@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3 rounded-2xl bg-theme-surface border border-theme text-sm text-theme-heading placeholder:text-theme-muted focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
@@ -215,8 +215,8 @@ export default function ContactPage() {
                 <p className="text-xs text-theme-muted mt-1 leading-relaxed">
                   Send us an email anytime for account assistance or general queries.
                 </p>
-                <a href="mailto:support@ebookvala.com" className="inline-block mt-2 text-xs font-bold text-primary-blue hover:underline">
-                  support@ebookvala.com
+                <a href="mailto:ebookvala.official@gmail.com" className="inline-block mt-2 text-xs font-bold text-primary-blue hover:underline">
+                  ebookvala.official@gmail.com
                 </a>
               </div>
             </div>
@@ -262,7 +262,7 @@ export default function ContactPage() {
                 Prefer Direct Email?
               </h4>
               <p className="text-xs text-theme-muted">
-                You can write directly to our core team at <a href="mailto:support@ebookvala.com" className="text-primary-blue font-bold hover:underline">support@ebookvala.com</a>.
+                You can write directly to our core team at <a href="mailto:ebookvala.official@gmail.com" className="text-primary-blue font-bold hover:underline">ebookvala.official@gmail.com</a>.
               </p>
             </div>
 

@@ -83,7 +83,7 @@ export default function PrivacyPolicyPage() {
               5. Your Rights & Data Subject Access
             </h2>
             <p>
-              Under the DPDP Act 2023, Indian residents have the right to inspect, update, or request complete deletion of their account data (&quot;Right to be Forgotten&quot;). You may request data export or account closure by contacting our Data Protection Officer at <a href="mailto:privacy@ebookvala.com" className="text-primary-blue underline">privacy@ebookvala.com</a>.
+              Under the DPDP Act 2023, Indian residents have the right to inspect, update, or request complete deletion of their account data (&quot;Right to be Forgotten&quot;). You may request data export or account closure by contacting our Data Protection Officer at <a href="mailto:ebookvala.official@gmail.com" className="text-primary-blue underline">ebookvala.official@gmail.com</a>.
             </p>
           </section>
 
@@ -96,7 +96,7 @@ export default function PrivacyPolicyPage() {
               <br />
               <strong>Grievance Officer:</strong> Prince Gajera
               <br />
-              <strong>Email:</strong> support@ebookvala.com | privacy@ebookvala.com
+              <strong>Email:</strong> ebookvala.official@gmail.com
               <br />
               <strong>Address:</strong> EbookVala Tech HQ, Gujarat, India.
             </p>

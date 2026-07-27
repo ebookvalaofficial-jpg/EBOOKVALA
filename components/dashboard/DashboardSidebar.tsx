@@ -11,6 +11,7 @@ import {
   Highlighter,
   BarChart3,
   Trophy,
+  ShoppingCart,
   ShoppingBag,
   Sparkles,
   Settings,
@@ -24,6 +25,7 @@ import { signOut } from 'next-auth/react';
 export const dashboardNavItems = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Library', href: '/dashboard/library', icon: BookOpen },
+  { label: 'My Cart', href: '/cart', icon: ShoppingCart },
   { label: 'Wishlist', href: '/wishlist', icon: Heart },
   { label: 'Highlights & Notes', href: '/dashboard/notes', icon: Highlighter },
   { label: 'Reading Stats', href: '/dashboard/stats', icon: BarChart3 },

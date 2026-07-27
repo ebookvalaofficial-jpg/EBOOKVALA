@@ -34,37 +34,61 @@ export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [liveCategoryCounts, setLiveCategoryCounts] = useState<Record<string, number>>({});
   const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchCartCount = React.useCallback(async () => {
-    if (status !== 'authenticated') {
-      setCartCount(0);
+  // Fetch live category counts for Mega Menu
+  useEffect(() => {
+    async function loadCategoryCounts() {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          const map: Record<string, number> = {};
+          if (data.categories && Array.isArray(data.categories)) {
+            data.categories.forEach((cat: any) => {
+              if (cat.slug) map[cat.slug] = cat.bookCount || 0;
+              if (cat.id) map[cat.id] = cat.bookCount || 0;
+            });
+          }
+          setLiveCategoryCounts(map);
+        }
+      } catch (err) {
+        console.error('Failed to load mega-menu category counts:', err);
+      }
+    }
+    loadCategoryCounts();
+  }, []);
+
+  // Real-time Database Search Handler
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
       return;
     }
-    try {
-      const res = await fetch('/api/cart');
-      if (res.ok) {
-        const data = await res.json();
-        setCartCount(data.itemCount || 0);
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/books?search=${encodeURIComponent(searchQuery.trim())}&limit=20`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.books || []);
+        }
+      } catch (err) {
+        console.error('Search API error:', err);
+      } finally {
+        setIsSearching(false);
       }
-    } catch (err) {
-      console.error('Error fetching cart count:', err);
-    }
-  }, [status]);
+    }, 250);
 
-  useEffect(() => {
-    fetchCartCount();
-  }, [fetchCartCount]);
-
-  useEffect(() => {
-    const handleCartUpdated = () => fetchCartCount();
-    window.addEventListener('cart-updated', handleCartUpdated);
-    return () => window.removeEventListener('cart-updated', handleCartUpdated);
-  }, [fetchCartCount]);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Close user dropdown menu when clicking outside
   useEffect(() => {
@@ -245,26 +269,30 @@ export default function Navbar() {
                               Top Categories
                             </span>
                             <div className="grid grid-cols-2 gap-2">
-                              {categories.map((cat) => (
-                                <Link
-                                  key={cat.id}
-                                  href={`/books?category=${cat.id}`}
-                                  onClick={() => setIsMegaMenuOpen(false)}
-                                  className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors group"
-                                >
-                                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-primary-blue flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <BookOpen className="w-4 h-4" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs font-semibold text-theme-heading group-hover:text-primary-blue transition-colors truncate">
-                                      {cat.name}
-                                    </span>
-                                    <span className="text-[10px] text-theme-muted">
-                                      {cat.bookCount}
-                                    </span>
-                                  </div>
-                                </Link>
-                              ))}
+                              {categories.map((cat) => {
+                                const count = liveCategoryCounts[cat.id] ?? 0;
+                                const formattedCount = `${count} ${count === 1 ? 'eBook' : 'eBooks'}`;
+                                return (
+                                  <Link
+                                    key={cat.id}
+                                    href={`/books?category=${cat.id}`}
+                                    onClick={() => setIsMegaMenuOpen(false)}
+                                    className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors group"
+                                  >
+                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-primary-blue flex items-center justify-center group-hover:scale-110 transition-transform">
+                                      <BookOpen className="w-4 h-4" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                      <span className="text-xs font-semibold text-theme-heading group-hover:text-primary-blue transition-colors truncate">
+                                        {cat.name}
+                                      </span>
+                                      <span className="text-[10px] text-theme-muted">
+                                        {formattedCount}
+                                      </span>
+                                    </div>
+                                  </Link>
+                                );
+                              })}
                             </div>
                           </motion.div>
                         )}
@@ -290,29 +318,19 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* RIGHT: Search, Dark/Light Toggle, Login, Magnetic CTA */}
+            {/* RIGHT: Search, Dark/Light Toggle, User Menu / Sign In */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Standalone Search Icon Trigger */}
+              {/* Standalone Search Trigger Button */}
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 text-theme-heading hover:text-primary-blue bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-theme rounded-xl transition-all relative"
+                className="p-2.5 text-theme-heading hover:text-primary-blue bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-theme rounded-xl transition-all relative flex items-center gap-2 text-xs font-semibold"
                 aria-label="Open Search Modal"
               >
-                <Search className="w-4 h-4" />
-              </button>
-
-              {/* Shopping Cart Drawer Trigger */}
-              <button
-                onClick={() => setIsCartDrawerOpen(true)}
-                className="p-2.5 text-theme-heading hover:text-primary-blue bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-theme rounded-xl transition-all relative shrink-0"
-                aria-label="Open Shopping Cart"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white font-black text-[9px] min-w-[18px] h-[18px] px-1 rounded-full border-2 border-theme-bg flex items-center justify-center shadow-md font-stats pointer-events-none">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
+                <Search className="w-4 h-4 text-primary-blue" />
+                <span className="hidden sm:inline-block text-theme-muted">Search...</span>
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-bold text-theme-muted bg-slate-200 dark:bg-slate-700/80 rounded border border-theme">
+                  ⌘K
+                </kbd>
               </button>
 
               {/* Theme Toggle (Sun/Moon Morph) */}
@@ -336,7 +354,7 @@ export default function Navbar() {
                 </motion.div>
               </button>
 
-              {/* Auth Session State: User Menu or Sign In / Get Started */}
+              {/* Auth Session State */}
               {status === 'loading' ? (
                 <div className="w-24 h-9 bg-slate-200 dark:bg-slate-800/60 animate-pulse rounded-xl" />
               ) : session?.user ? (
@@ -401,6 +419,14 @@ export default function Navbar() {
                         )}
 
                         <Link
+                          href="/dashboard"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
+                        >
+                          <User className="w-4 h-4 text-blue-400" />
+                          <span>My Dashboard</span>
+                        </Link>
+                        <Link
                           href="/books"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
@@ -422,23 +448,7 @@ export default function Navbar() {
                           className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
                         >
                           <ShoppingCart className="w-4 h-4 text-emerald-500" />
-                          <span>Shopping Cart ({cartCount})</span>
-                        </Link>
-                        <Link
-                          href="/account/orders"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
-                        >
-                          <Zap className="w-4 h-4 text-indigo-500" />
-                          <span>My Orders & Invoices</span>
-                        </Link>
-                        <Link
-                          href="/account/subscription"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 hover:text-white rounded-xl transition-colors"
-                        >
-                          <Sparkles className="w-4 h-4 text-amber-500" />
-                          <span>My Subscription</span>
+                          <span>Shopping Cart</span>
                         </Link>
                         <div className="pt-1 border-t border-slate-800">
                           <button
@@ -493,34 +503,37 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* SEARCH COMMAND PALETTE MODAL */}
+      {/* SEARCH COMMAND PALETTE MODAL - REAL DATABASE RESULTS */}
       <AnimatePresence>
         {isSearchOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
+          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 sm:pt-20 px-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsSearchOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="relative w-full max-w-2xl bg-theme-card border border-theme rounded-2xl shadow-2xl overflow-hidden z-10 glass-card"
+              className="relative w-full max-w-2xl bg-theme-card border border-theme rounded-3xl shadow-2xl overflow-hidden z-10 glass-card"
             >
-              {/* Search Bar Input */}
-              <div className="flex items-center px-4 py-3 border-b border-theme bg-slate-500/5">
-                <Search className="w-5 h-5 text-primary-blue mr-3" />
+              {/* Search Input Bar */}
+              <div className="flex items-center px-4 py-3.5 border-b border-theme/70 bg-slate-500/5">
+                <Search className="w-5 h-5 text-primary-blue mr-3 shrink-0" />
                 <input
                   type="text"
-                  placeholder="Search eBooks, authors, categories, or AI summaries..."
+                  placeholder="Search eBooks by title, author, category..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-theme-heading text-sm focus:outline-none placeholder:text-theme-muted font-medium"
+                  className="w-full bg-transparent text-theme-heading text-sm sm:text-base focus:outline-none placeholder:text-theme-muted font-medium"
                   autoFocus
                 />
+                {isSearching && (
+                  <div className="w-4 h-4 border-2 border-primary-blue border-t-transparent rounded-full animate-spin mr-2 shrink-0" />
+                )}
                 <button
                   onClick={() => setIsSearchOpen(false)}
                   className="p-1 text-theme-muted hover:text-theme-heading rounded-lg"
@@ -529,21 +542,55 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* Search Results */}
-              <div className="max-h-96 overflow-y-auto p-4 space-y-3">
-                <div className="text-[11px] font-bold text-theme-muted uppercase tracking-wider px-2">
-                  {searchQuery ? 'Search Results' : 'Recommended Trending Books'}
+              {/* Search Results (Scrollable) */}
+              <div className="max-h-96 overflow-y-auto p-4 space-y-2" data-lenis-prevent>
+                <div className="text-[11px] font-extrabold text-theme-muted uppercase tracking-wider px-2 mb-1 flex items-center justify-between">
+                  <span>{searchQuery ? `Matching Results (${searchResults.length})` : 'Recommended Trending Books'}</span>
+                  {searchQuery && (
+                    <span className="text-[10px] text-primary-blue font-bold">Real Database Search</span>
+                  )}
                 </div>
-                {filteredBooks.length === 0 ? (
+
+                {searchQuery.trim() === '' ? (
+                  // Default Recommended List when empty
+                  trendingBooks.slice(0, 4).map((book) => (
+                    <Link
+                      key={book.id}
+                      href={`/books/${(book as any).slug || book.id}`}
+                      onClick={() => setIsSearchOpen(false)}
+                      className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent hover:border-theme transition-all group"
+                    >
+                      <div className="relative w-12 h-16 rounded-xl overflow-hidden bg-slate-900 shrink-0 shadow-sm">
+                        <Image src={book.coverImage} alt={book.title} fill sizes="48px" className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-extrabold text-theme-heading group-hover:text-primary-blue truncate transition-colors font-montserrat">
+                          {book.title}
+                        </h4>
+                        <p className="text-xs text-theme-muted truncate">
+                          By <strong className="text-theme-heading">{book.author}</strong> • <span className="text-blue-400 font-semibold">{book.category}</span>
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-sm font-black text-theme-heading font-stats">
+                          ₹{book.discountPrice}
+                        </span>
+                        <span className="block text-[10px] text-emerald-500 font-bold">
+                          {book.discountBadge}
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+                ) : searchResults.length === 0 && !isSearching ? (
                   <div className="text-center py-10 px-4 space-y-3">
                     <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-primary-blue flex items-center justify-center mx-auto border border-blue-500/20">
                       <Search className="w-6 h-6" />
                     </div>
                     <h4 className="text-base font-bold text-theme-heading font-montserrat">
-                      No Search Results Found
+                      No Books Found
                     </h4>
                     <p className="text-xs text-theme-muted max-w-xs mx-auto">
-                      We couldn&apos;t find any eBooks matching &quot;<span className="text-theme-heading font-semibold">{searchQuery}</span>&quot;. Try checking for typos or searching by author name.
+                      No eBooks matched &quot;<span className="text-theme-heading font-semibold">{searchQuery}</span>&quot;. Try checking for typos or searching by category name.
                     </p>
                     <div className="pt-2">
                       <Link
@@ -551,43 +598,39 @@ export default function Navbar() {
                         onClick={() => setIsSearchOpen(false)}
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all"
                       >
-                        <span>Browse All Store eBooks</span>
+                        <span>Browse eBook Store</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>
                 ) : (
-                  filteredBooks.map((book) => (
+                  searchResults.map((book) => (
                     <Link
                       key={book.id}
-                      href={`/books/${(book as any).slug || book.id}`}
+                      href={`/books/${book.slug}`}
                       onClick={() => setIsSearchOpen(false)}
-                      className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors group"
+                      className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent hover:border-theme transition-all group"
                     >
-                      <div className="relative w-12 h-16 rounded-md overflow-hidden bg-slate-800 shrink-0">
-                        <Image
-                          src={book.coverImage}
-                          alt={book.title}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
+                      <div className="relative w-12 h-16 rounded-xl overflow-hidden bg-slate-900 shrink-0 shadow-sm">
+                        <Image src={book.coverImageUrl} alt={book.title} fill sizes="48px" className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-theme-heading group-hover:text-primary-blue truncate transition-colors">
+                        <h4 className="text-sm font-extrabold text-theme-heading group-hover:text-primary-blue truncate transition-colors font-montserrat">
                           {book.title}
                         </h4>
                         <p className="text-xs text-theme-muted truncate">
-                          {book.author} • <span className="text-primary-blue">{book.category}</span>
+                          By <strong className="text-theme-heading">{book.author?.name || 'Author'}</strong> • <span className="text-purple-400 font-semibold">{book.category?.name || 'Category'}</span>
                         </p>
                       </div>
-                      <div className="text-right">
-                        <span className="text-sm font-bold text-theme-heading">
-                          ₹{book.discountPrice}
+                      <div className="text-right shrink-0">
+                        <span className="text-sm font-black text-theme-heading font-stats">
+                          ₹{book.price}
                         </span>
-                        <span className="block text-[10px] text-green-500 font-semibold">
-                          {book.discountBadge}
-                        </span>
+                        {book.isBestseller && (
+                          <span className="block text-[10px] text-amber-400 font-bold uppercase">
+                            Bestseller
+                          </span>
+                        )}
                       </div>
                     </Link>
                   ))
@@ -709,9 +752,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Cart Slide-in Drawer */}
-      <CartDrawer isOpen={isCartDrawerOpen} onClose={() => setIsCartDrawerOpen(false)} />
     </>
   );
 }

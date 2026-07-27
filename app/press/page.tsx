@@ -110,7 +110,7 @@ export default function PressPage() {
           <div className="p-8 rounded-3xl bg-blue-500/10 border border-blue-500/20 text-center space-y-2">
             <h3 className="text-base font-bold text-theme-heading font-montserrat">Media Inquiries</h3>
             <p className="text-xs sm:text-sm text-theme-muted">
-              For press inquiries, founder interviews, or feature commentary, please email <a href="mailto:press@ebookvala.com" className="text-primary-blue font-bold underline">press@ebookvala.com</a>.
+              For press inquiries, founder interviews, or feature commentary, please email <a href="mailto:ebookvala.official@gmail.com" className="text-primary-blue font-bold underline">ebookvala.official@gmail.com</a>.
             </p>
           </div>
         </div>

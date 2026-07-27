@@ -62,7 +62,7 @@ export default function RefundPolicyPage() {
               <HelpCircle className="w-5 h-5 text-blue-500" /> 4. How to Request a Refund
             </h2>
             <p>
-              To initiate a refund request, visit <a href="/report-a-problem" className="text-primary-blue underline">Report a Problem</a> or email <a href="mailto:support@ebookvala.com" className="text-primary-blue underline">support@ebookvala.com</a> with your Order ID and payment receipt. Eligible refunds are processed back to your original payment method via Razorpay within 5 to 7 business days.
+              To initiate a refund request, visit <a href="/report-a-problem" className="text-primary-blue underline">Report a Problem</a> or email <a href="mailto:ebookvala.official@gmail.com" className="text-primary-blue underline font-bold">ebookvala.official@gmail.com</a> with your Order ID and payment receipt. Eligible refunds are processed back to your original payment method via Razorpay within 5 to 7 business days.
             </p>
           </section>
         </div>

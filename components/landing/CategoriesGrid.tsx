@@ -29,6 +29,34 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 export default function CategoriesGrid() {
+  const [liveCounts, setLiveCounts] = React.useState<Record<string, number>>({});
+
+  React.useEffect(() => {
+    let isMounted = true;
+    async function fetchCounts() {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          const map: Record<string, number> = {};
+          if (data.categories && Array.isArray(data.categories)) {
+            data.categories.forEach((cat: any) => {
+              if (cat.slug) map[cat.slug] = cat.bookCount || 0;
+              if (cat.id) map[cat.id] = cat.bookCount || 0;
+            });
+          }
+          if (isMounted) setLiveCounts(map);
+        }
+      } catch (err) {
+        console.error('Failed to load live category counts:', err);
+      }
+    }
+    fetchCounts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <section id="categories" className="py-24 bg-theme-bg relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,10 +91,12 @@ export default function CategoriesGrid() {
           </motion.p>
         </div>
 
-        {/* 3-Per-Row Grid for 6 Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* 3-Per-Row Grid for 6 Categories - Equal Heights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {categories.map((cat, idx) => {
             const IconComponent = CATEGORY_ICONS[cat.id] || CATEGORY_ICONS[cat.iconName] || BookOpen;
+            const count = liveCounts[cat.id] ?? 0;
+            const formattedCount = `${count} ${count === 1 ? 'eBook' : 'eBooks'}`;
 
             return (
               <motion.div
@@ -75,32 +105,35 @@ export default function CategoriesGrid() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.08 }}
+                className="h-full flex"
               >
                 <Link
                   href={`/books?category=${cat.id}`}
-                  className={`relative rounded-3xl p-6 sm:p-8 border border-theme shadow-lg overflow-hidden group cursor-pointer bg-gradient-to-br ${cat.gradient} glass-card min-h-[240px] flex flex-col justify-between block hover:-translate-y-1.5 transition-all duration-300`}
+                  className={`relative rounded-3xl p-6 sm:p-8 border border-theme shadow-lg overflow-hidden group cursor-pointer bg-gradient-to-br ${cat.gradient} glass-card w-full min-h-[260px] flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300`}
                 >
                   {/* Decorative Background Pattern */}
                   <div className="absolute inset-0 opacity-10 group-hover:opacity-25 transition-opacity bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
-                  {/* Top Row: Icon + Book Count Badge */}
+                  {/* Top Row: Icon + Real Book Count Badge */}
                   <div className="flex items-center justify-between relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-white/10 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
                       <IconComponent className="w-6 h-6 text-amber-400" />
                     </div>
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-900/60 text-white backdrop-blur-sm border border-slate-700/50">
-                      {cat.bookCount}
+                      {formattedCount}
                     </span>
                   </div>
 
                   {/* Bottom Content */}
-                  <div className="relative z-10 mt-6">
-                    <h3 className="font-extrabold text-white font-montserrat text-xl mb-1.5 group-hover:text-amber-300 transition-colors">
-                      {cat.name}
-                    </h3>
-                    <p className="text-slate-200 text-xs sm:text-sm line-clamp-2 leading-relaxed">
-                      {cat.description}
-                    </p>
+                  <div className="relative z-10 mt-6 flex flex-col justify-between flex-1">
+                    <div>
+                      <h3 className="font-extrabold text-white font-montserrat text-xl mb-1.5 group-hover:text-amber-300 transition-colors">
+                        {cat.name}
+                      </h3>
+                      <p className="text-slate-200 text-xs sm:text-sm line-clamp-2 leading-relaxed">
+                        {cat.description}
+                      </p>
+                    </div>
 
                     <div className="mt-4 flex items-center gap-2 text-xs font-bold text-amber-400 opacity-90 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
                       <span>Explore Books</span>

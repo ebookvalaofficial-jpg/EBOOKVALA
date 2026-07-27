@@ -7,14 +7,14 @@
   --primary-blue: #2563EB;
   --secondary-purple: #4F46E5;
   --accent-gold: #FACC15;
-  --text-heading: #111827;
-  --text-body: #475569;
-  --text-muted: #94A3B8;
-  --border-color: #E5E7EB;
-  --status-success: #22C55E;
-  --status-warning: #F59E0B;
-  --status-error: #EF4444;
-  --status-info: #3B82F6;
+  --text-heading: #0F172A;
+  --text-body: #334155;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --status-success: #16A34A;
+  --status-warning: #D97706;
+  --status-error: #DC2626;
+  --status-info: #2563EB;
 }
 
 .dark {
