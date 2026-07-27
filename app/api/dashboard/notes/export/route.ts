@@ -135,18 +135,18 @@ export async function GET(req: Request) {
         <body>
           <button onclick="window.print()" style="position:fixed;top:20px;right:20px;padding:10px 20px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Print / Save as PDF</button>
           <h1>${title}</h1>
-          <p className="meta">Exported on: ${dateStr}</p>
+          <p class="meta">Exported on: ${dateStr}</p>
 
           <h2>📚 Highlights & Annotations (${highlights.length})</h2>
       `;
 
       highlights.forEach((h, i) => {
         html += `
-          <div className="item">
+          <div class="item">
             <h3 style="margin:0 0 6px 0;font-size:16px;">${i + 1}. ${h.book.title} <span style="font-weight:normal;color:#64748b;">(${h.chapter.title})</span></h3>
             <blockquote>"${h.selectedText}"</blockquote>
             ${h.note ? `<p style="margin:4px 0;"><strong>Note:</strong> ${h.note}</p>` : ''}
-            <div className="meta">Color: ${h.color} • ${h.isPublic ? 'Public Note' : 'Private'} • ${new Date(h.createdAt).toLocaleDateString()}</div>
+            <div class="meta">Color: ${h.color} • ${h.isPublic ? 'Public Note' : 'Private'} • ${new Date(h.createdAt).toLocaleDateString()}</div>
           </div>
         `;
       });
@@ -159,7 +159,7 @@ export async function GET(req: Request) {
 
       html += `<h2>📝 Sticky Notes (${stickyNotes.length})</h2>`;
       stickyNotes.forEach((s) => {
-        html += `<div className="item"><h3>${s.title || 'Untitled Note'}</h3><p>${s.content}</p></div>`;
+        html += `<div class="item"><h3>${s.title || 'Untitled Note'}</h3><p>${s.content}</p></div>`;
       });
 
       html += `
