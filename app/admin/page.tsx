@@ -51,11 +51,11 @@ export default async function AdminOverviewPage() {
     }),
     prisma.authorApplication.count({ where: { status: 'PENDING' } }),
     prisma.authorBookSubmission.count({ where: { status: 'PENDING' } }),
-    prisma.payoutRequest.count({ where: { status: 'PENDING' } }),
+    prisma.payoutRequest.count({ where: { status: { in: ['PENDING', 'REQUESTED'] } } }),
     prisma.payoutRequest.count({
       where: {
-        status: 'PENDING',
-        createdAt: { lte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        status: { in: ['PENDING', 'REQUESTED'] },
+        requestedAt: { lte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
       },
     }),
     prisma.dmcaRequest.count({ where: { status: 'PENDING' } }),
