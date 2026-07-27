@@ -5,6 +5,7 @@ import PwaInitializer from '@/components/pwa/PwaInitializer';
 import OfflineIndicator from '@/components/pwa/OfflineIndicator';
 import UpdateAvailableBanner from '@/components/pwa/UpdateAvailableBanner';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
+import MobileBottomNav from '@/components/landing/MobileBottomNav';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -182,13 +183,14 @@ export default function RootLayout({
           </Script>
         )}
       </head>
-      <body className="antialiased min-h-screen bg-theme-bg text-theme-body selection:bg-blue-600 selection:text-white">
+      <body className="antialiased min-h-screen bg-theme-bg text-theme-body selection:bg-blue-600 selection:text-white pb-16 md:pb-0">
         <Providers>
           <PwaInitializer />
           <OfflineIndicator />
           <UpdateAvailableBanner />
           <InstallPrompt />
           {children}
+          <MobileBottomNav />
         </Providers>
       </body>
     </html>
