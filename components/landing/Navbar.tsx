@@ -10,7 +10,6 @@ import {
   Code2, TrendingUp, Zap, Briefcase, Command, ArrowRight, User, LogOut, CheckCircle2,
   ShoppingCart, Heart
 } from 'lucide-react';
-import { useTheme } from '@/components/ThemeProvider';
 import { categories } from '@/data/categories';
 import { trendingBooks, featuredBook } from '@/data/books';
 import { setScrollLocked } from '@/lib/scroll-lock';
@@ -27,7 +26,6 @@ const navItems = [
 
 export default function Navbar() {
   const { data: session, status } = useSession();
-  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -318,7 +316,7 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* RIGHT: Search, Dark/Light Toggle, User Menu / Sign In */}
+            {/* RIGHT: Search, User Menu / Sign In */}
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Standalone Search Trigger Button */}
               <button
@@ -331,27 +329,6 @@ export default function Navbar() {
                 <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-bold text-theme-muted bg-slate-200 dark:bg-slate-700/80 rounded border border-theme">
                   ⌘K
                 </kbd>
-              </button>
-
-              {/* Theme Toggle (Sun/Moon Morph) */}
-              <button
-                onClick={toggleTheme}
-                className="p-2.5 text-theme-heading hover:text-primary-blue bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-theme rounded-xl transition-all relative overflow-hidden"
-                aria-label="Toggle Theme"
-              >
-                <motion.div
-                  key={theme}
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {theme === 'dark' ? (
-                    <Sun className="w-4 h-4 text-yellow-400" />
-                  ) : (
-                    <Moon className="w-4 h-4 text-indigo-600" />
-                  )}
-                </motion.div>
               </button>
 
               {/* Auth Session State */}
@@ -693,16 +670,6 @@ export default function Navbar() {
             </div>
 
             <div className="pt-6 border-t border-theme flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-theme-muted">Theme Preference</span>
-                <button
-                  onClick={toggleTheme}
-                  className="p-2.5 text-theme-heading bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center gap-2 text-xs font-bold"
-                >
-                  {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
-                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                </button>
-              </div>
 
               {session?.user ? (
                 <div className="p-3 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-theme space-y-3">

@@ -4,8 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { BookOpen, Sparkles, Sun, Moon, Star, ShieldCheck, Zap, Bot, ArrowLeft } from 'lucide-react';
-import { useTheme } from '@/components/ThemeProvider';
+import { BookOpen, Sparkles, Star, ShieldCheck, Zap, Bot, ArrowLeft } from 'lucide-react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -14,7 +13,6 @@ interface AuthLayoutProps {
 }
 
 export default function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
-  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-theme-bg text-theme-body flex flex-col justify-between selection:bg-blue-600 selection:text-white">
@@ -48,23 +46,11 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-theme-muted hover:text-theme-heading transition-colors px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex items-center gap-1.5 text-xs font-semibold text-theme-muted hover:text-theme-heading transition-colors px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
-
-          <button
-            onClick={toggleTheme}
-            className="p-2.5 text-theme-heading hover:text-primary-blue bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-theme rounded-xl transition-all"
-            aria-label="Toggle Theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-yellow-400" />
-            ) : (
-              <Moon className="w-4 h-4 text-indigo-600" />
-            )}
-          </button>
         </div>
       </header>
 
