@@ -32,7 +32,7 @@ export default function AdminBroadcastPage() {
       }
     } catch (err) {
       console.error('Fetch broadcast logs error:', err);
-    } font-inter finally {
+    } finally {
       setIsLoadingLogs(false);
     }
   };

@@ -106,3 +106,35 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
 
   return { success: true, url: resetUrl };
 }
+
+export async function sendRawEmail(email: string, subject: string, htmlContent: string): Promise<{ success: boolean }> {
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  if (resendApiKey && !resendApiKey.startsWith('re_123456789')) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${resendApiKey}`,
+        },
+        body: JSON.stringify({
+          from: 'EbookVala <onboarding@resend.dev>',
+          to: [email],
+          subject,
+          html: htmlContent,
+        }),
+      });
+
+      if (response.ok) {
+        console.log(`[RESEND API SUCCESS] Raw email sent to ${email}`);
+        return { success: true };
+      }
+    } catch (err) {
+      console.error('[EMAIL UTILITY ERROR] Failed to send email via Resend API:', err);
+    }
+  }
+
+  console.log(`✉️ [FALLBACK RAW EMAIL] To: ${email} | Subject: ${subject}`);
+  return { success: true };
+}
