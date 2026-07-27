@@ -2,21 +2,19 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { loginSchema, LoginInput } from '@/lib/validations/auth';
-import SocialLoginButtons from './SocialLoginButtons';
 
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
 
   const [formData, setFormData] = useState<LoginInput>({
     email: '',
     password: '',
-    rememberMe: false,
+    rememberMe: true,
   });
 
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -25,7 +23,6 @@ export default function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [serverSuccess, setServerSuccess] = useState<string | null>(null);
 
-  // Real-time inline field validation
   const validateField = (field: keyof LoginInput, value: unknown) => {
     const updated = { ...formData, [field]: value };
     const result = loginSchema.safeParse(updated);
@@ -91,31 +88,40 @@ export default function LoginForm() {
 
   return (
     <div className="w-full space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-3xl font-extrabold text-white tracking-tight font-montserrat">
+          Sign in
+        </h2>
+        <p className="text-sm text-slate-400 mt-1 font-inter">
+          Enter credentials to access EBOOKVALA.
+        </p>
+      </div>
 
-      {/* Server Feedback Banners */}
+      {/* Feedback Banners */}
       {serverError && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in">
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-medium flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{serverError}</span>
         </div>
       )}
 
       {serverSuccess && (
-        <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in">
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-medium flex items-start gap-2.5">
           <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{serverSuccess}</span>
         </div>
       )}
 
-      {/* Form Fields */}
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        {/* Email Field */}
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        {/* Email */}
         <div>
-          <label className="block text-xs font-bold text-theme-heading mb-1.5 uppercase tracking-wider">
-            Email Address
+          <label className="block text-xs font-bold text-slate-300 mb-2 uppercase tracking-widest font-mono">
+            EMAIL ADDRESS
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-theme-muted">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Mail className="w-4 h-4" />
             </div>
             <input
@@ -123,34 +129,22 @@ export default function LoginForm() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="you@example.com"
-              className={`w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/80 border text-theme-heading text-sm rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                errors.email
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-theme focus:ring-blue-500'
+              placeholder="name@example.com"
+              className={`w-full pl-10 pr-4 py-3 bg-[#0f172a] border text-white text-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500 ${
+                errors.email ? 'border-red-500' : 'border-slate-800'
               }`}
             />
           </div>
-          {errors.email && (
-            <p className="text-xs text-red-500 mt-1 font-medium">{errors.email}</p>
-          )}
+          {errors.email && <p className="text-xs text-red-400 mt-1.5 font-medium">{errors.email}</p>}
         </div>
 
-        {/* Password Field */}
+        {/* Password */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-bold text-theme-heading uppercase tracking-wider">
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-xs font-semibold text-primary-blue hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <label className="block text-xs font-bold text-slate-300 mb-2 uppercase tracking-widest font-mono">
+            PASSWORD
+          </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-theme-muted">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Lock className="w-4 h-4" />
             </div>
             <input
@@ -159,27 +153,28 @@ export default function LoginForm() {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className={`w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-slate-800/80 border text-theme-heading text-sm rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                errors.password
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-theme focus:ring-blue-500'
+              className={`w-full pl-10 pr-10 py-3 bg-[#0f172a] border text-white text-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500 ${
+                errors.password ? 'border-red-500' : 'border-slate-800'
               }`}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-theme-muted hover:text-theme-heading"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-xs text-red-500 mt-1 font-medium">{errors.password}</p>
-          )}
+          {errors.password && <p className="text-xs text-red-400 mt-1.5 font-medium">{errors.password}</p>}
+
+          <div className="flex justify-end mt-2">
+            <Link href="/forgot-password" className="text-xs font-semibold text-blue-400 hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
         </div>
 
-        {/* Remember Me Checkbox */}
+        {/* Remember me */}
         <div className="flex items-center">
           <input
             id="rememberMe"
@@ -187,10 +182,10 @@ export default function LoginForm() {
             type="checkbox"
             checked={formData.rememberMe}
             onChange={handleChange}
-            className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
+            className="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 rounded focus:ring-blue-500"
           />
-          <label htmlFor="rememberMe" className="ml-2 text-xs font-medium text-theme-body cursor-pointer">
-            Remember me on this device
+          <label htmlFor="rememberMe" className="ml-2 text-xs font-medium text-slate-300 cursor-pointer">
+            Remember me for 30 days
           </label>
         </div>
 
@@ -198,7 +193,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3.5 px-4 font-bold text-sm text-white brand-gradient-bg rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full py-3.5 px-6 font-bold text-sm text-white bg-[#2563eb] hover:bg-blue-500 rounded-full shadow-lg shadow-blue-600/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-4"
         >
           {isLoading ? (
             <>
@@ -206,16 +201,19 @@ export default function LoginForm() {
               <span>Signing In...</span>
             </>
           ) : (
-            <span>Sign In to Account</span>
+            <>
+              <span>Sign In</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
           )}
         </button>
       </form>
 
-      {/* Redirect to Signup */}
-      <p className="text-center text-xs text-theme-muted pt-2 font-medium">
-        Don&apos;t have an account yet?{' '}
-        <Link href="/signup" className="text-primary-blue font-bold hover:underline">
-          Create an Account
+      {/* Footer link */}
+      <p className="text-center text-xs text-slate-400 pt-2 font-medium">
+        Don&apos;t have an account?{' '}
+        <Link href="/signup" className="text-blue-400 font-bold hover:underline">
+          Register
         </Link>
       </p>
     </div>

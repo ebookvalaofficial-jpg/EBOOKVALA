@@ -12,13 +12,10 @@ export const metadata: Metadata = {
 
 export default function SignupPage() {
   return (
-    <AuthLayout
-      title="Create Your EbookVala Account"
-      subtitle="Start your journey today with instant access to curated eBooks, smart AI summaries, and interactive flashcards."
-    >
+    <AuthLayout>
       <Suspense fallback={
         <div className="w-full py-12 flex justify-center items-center">
-          <Loader2 className="w-6 h-6 animate-spin text-primary-blue" />
+          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
         </div>
       }>
         <SignupForm />
