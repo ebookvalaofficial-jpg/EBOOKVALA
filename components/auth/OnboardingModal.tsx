@@ -8,7 +8,7 @@ import { BookOpen, PenTool, Sparkles, CheckCircle2, ArrowRight, X } from 'lucide
 
 export default function OnboardingModal() {
   const { data: session, status } = useSession();
-  const router = RouterHook();
+  const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'READER' | 'AUTHOR' | 'BOTH'>('READER');
@@ -216,8 +216,4 @@ export default function OnboardingModal() {
       </div>
     </AnimatePresence>
   );
-}
-
-function RouterHook() {
-  return useRouter();
 }

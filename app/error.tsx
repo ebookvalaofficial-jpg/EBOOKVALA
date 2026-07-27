@@ -22,11 +22,16 @@ export default function GlobalAppError({
           <AlertTriangle className="w-8 h-8" />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <h1 className="text-xl font-bold text-theme-heading font-montserrat">Something Went Wrong</h1>
           <p className="text-xs text-theme-muted leading-relaxed">
             An unexpected application error occurred. Don&apos;t worry, your reading data and progress are safe.
           </p>
+          {error?.message && (
+            <p className="text-[11px] font-mono text-red-400 bg-red-500/10 p-2.5 rounded-xl border border-red-500/20 max-w-full overflow-x-auto text-left break-all">
+              {error.message}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
