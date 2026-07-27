@@ -7,6 +7,8 @@ import { Sparkles, Star, BookOpen, Download } from 'lucide-react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
+  title?: string;
+  subtitle?: string;
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
