@@ -72,7 +72,11 @@ export default function LoginForm() {
       });
 
       if (res?.error) {
-        setServerError(res.error);
+        if (res.error === 'CredentialsSignin' || res.error === 'Configuration') {
+          setServerError('Invalid email or password. Please double-check your credentials and try again.');
+        } else {
+          setServerError(res.error);
+        }
         setIsLoading(false);
       } else {
         setServerSuccess('Signed in successfully! Redirecting...');

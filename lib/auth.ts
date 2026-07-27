@@ -44,21 +44,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        if (!user) {
-          throw new Error('No account found with this email address.');
+        if (!user || !user.password) {
+          return null;
         }
 
         if (user.isBanned) {
           throw new Error('Your account has been suspended by an administrator.');
         }
 
-        if (!user.password) {
-          throw new Error('This account was created with Google Sign-In. Please click "Continue with Google".');
-        }
-
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
-          throw new Error('Incorrect password. Please verify your credentials and try again.');
+          return null;
         }
 
         return {

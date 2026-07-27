@@ -8,7 +8,20 @@ async function main() {
 
   // 1. Seed Test Users
   const hashedPassword = await bcrypt.hash('Password123!', 10);
+  const adminHashedPassword = await bcrypt.hash('Admin123!Pass', 10);
   
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@ebookvala.com' },
+    update: { role: 'SUPER_ADMIN', password: adminHashedPassword },
+    create: {
+      email: 'admin@ebookvala.com',
+      name: 'EbookVala Admin',
+      password: adminHashedPassword,
+      role: 'SUPER_ADMIN',
+      emailVerified: new Date(),
+    },
+  });
+
   const user1 = await prisma.user.upsert({
     where: { email: 'prince@ebookvala.com' },
     update: { role: 'SUPER_ADMIN' },
