@@ -49,6 +49,7 @@ export default function BookDetailHero({ book }: BookDetailHeroProps) {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
+  const [showSampleModal, setShowSampleModal] = useState(false);
 
   const handleAddToCart = async () => {
     if (!session || !session.user) {
@@ -203,48 +204,108 @@ export default function BookDetailHero({ book }: BookDetailHeroProps) {
         <div className="p-6 rounded-3xl bg-theme-card border border-theme glass-card space-y-4 shadow-sm">
           <PriceTag price={book.price} originalPrice={book.originalPrice} discountPercent={book.discountPercent} size="lg" />
 
-          {/* Action CTAs */}
-          <div className="space-y-3 pt-2">
-            <Link
-              href={`/reader/${book.id}`}
-              className="w-full py-4 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all"
-            >
-              <BookOpen className="w-5 h-5" />
-              <span>Start Reading eBook</span>
-            </Link>
+            {/* Action CTAs */}
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Link
+                  href={`/reader/${book.id}`}
+                  className="py-3.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  <span>Start Reading eBook</span>
+                </Link>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={handleAddToCart}
-                disabled={isAddingToCart}
-                className={`px-6 py-3.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg ${
-                  isAddedToCart
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-white brand-gradient-bg shadow-blue-500/25 hover:shadow-blue-500/40'
-                }`}
-              >
-                {isAddingToCart ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : isAddedToCart ? (
-                  <>
-                    <Check className="w-5 h-5" /> Added to Cart
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5" /> Add to Cart
-                  </>
-                )}
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSampleModal(true)}
+                  className="py-3.5 rounded-xl text-sm font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 flex items-center justify-center gap-2 transition-all"
+                >
+                  <Sparkles className="w-4 h-4 text-yellow-400" />
+                  <span>Read Free Sample</span>
+                </button>
+              </div>
 
-              <button
-                onClick={handleBuyNow}
-                className="px-6 py-3.5 rounded-xl text-sm font-bold text-theme-heading bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-theme flex items-center justify-center gap-2 transition-all shadow-sm"
-              >
-                <Zap className="w-5 h-5 text-amber-500" />
-                <span>Buy Now</span>
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                  className={`px-6 py-3.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg ${
+                    isAddedToCart
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-white brand-gradient-bg shadow-blue-500/25 hover:shadow-blue-500/40'
+                  }`}
+                >
+                  {isAddingToCart ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : isAddedToCart ? (
+                    <>
+                      <Check className="w-5 h-5" /> Added to Cart
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" /> Add to Cart
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleBuyNow}
+                  className="px-6 py-3.5 rounded-xl text-sm font-bold text-theme-heading bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-theme flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <Zap className="w-5 h-5 text-amber-500" />
+                  <span>Buy Now</span>
+                </button>
+              </div>
             </div>
-          </div>
+
+            {/* Free Chapter Sample Preview Modal */}
+            {showSampleModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs font-inter">
+                <div className="w-full max-w-2xl p-6 sm:p-8 rounded-3xl bg-theme-card border border-theme glass-card shadow-2xl space-y-6 max-h-[85vh] flex flex-col justify-between">
+                  <div className="flex items-center justify-between pb-3 border-b border-theme">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono">
+                        Free Chapter 1 Preview
+                      </span>
+                      <h3 className="text-lg font-black text-theme-heading font-montserrat">{book.title}</h3>
+                    </div>
+                    <button
+                      onClick={() => setShowSampleModal(false)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-theme-surface text-theme-muted hover:text-theme-heading"
+                    >
+                      Close Preview
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto pr-2 text-sm text-theme-heading leading-relaxed space-y-4 font-serif">
+                    <h4 className="text-base font-bold font-montserrat text-blue-400">Chapter 1: The Beginning</h4>
+                    <p>
+                      Welcome to the sample preview of <strong>{book.title}</strong> by {book.author.name}.
+                    </p>
+                    <p>
+                      {book.description}
+                    </p>
+                    <blockquote className="p-4 rounded-2xl bg-blue-500/10 border-l-4 border-blue-500 italic text-xs font-sans text-blue-200">
+                      &quot;Knowledge is the greatest catalyst for human potential. Dive deeper into the full concepts, exercises, and AI interactive tools inside the complete eBook.&quot;
+                    </blockquote>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900/60 to-purple-900/60 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-bold text-white font-montserrat">Enjoying Chapter 1?</p>
+                      <p className="text-[11px] text-blue-200">Buy the full eBook to unlock all chapters, AI Chat & summaries!</p>
+                    </div>
+
+                    <button
+                      onClick={handleBuyNow}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition-all shadow-md shrink-0 flex items-center justify-center gap-1.5"
+                    >
+                      <Zap className="w-4 h-4 fill-current" /> Buy Full Book Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
           {/* Share Button */}
           <div className="pt-2 flex items-center justify-between text-xs text-theme-muted">

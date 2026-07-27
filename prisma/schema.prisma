@@ -72,6 +72,9 @@ model User {
   xpLogs                  XpLog[]
   coinLogs                CoinLog[]
   dailyRewards            DailyReward[]
+  coAuthoredBooks         BookCoAuthor[]
+  emailBroadcasts         EmailBroadcast[]
+  pushSubscriptions       PushSubscription[]
   createdAt               DateTime                @default(now())
   updatedAt               DateTime                @updatedAt
 }
@@ -170,6 +173,11 @@ model Book {
   isTrending           Boolean           @default(false)
   isDeleted            Boolean           @default(false)
   deletedAt            DateTime?
+  saleEndsAt           DateTime?
+  seriesId             String?
+  series               BookSeries?       @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  coAuthors            BookCoAuthor[]
+  bundleBooks          BundleBook[]
   reviews              Review[]
   wishlists            Wishlist[]
   favorites            Favorite[]
@@ -299,6 +307,7 @@ model PromoCode {
   minOrderAmount Int?      @default(0)
   maxUses        Int?
   usedCount      Int       @default(0)
+  authorUserId   String?
   expiresAt      DateTime?
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
@@ -543,6 +552,7 @@ model AuthorBookSubmission {
   submittedAt        DateTime?
   reviewedAt         DateTime?
   deletedAt          DateTime?
+  previewLinks       AuthorPreviewLink[]
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -911,3 +921,108 @@ model DailyReward {
 
   @@unique([userId, claimedDate])
 }
+
+// ═══════════════════════════════════════
+// NEW GROWTH & ADVANCED AUTHOR/ADMIN MODELS
+// ═══════════════════════════════════════
+
+model EmailBroadcast {
+  id             String   @id @default(cuid())
+  subject        String
+  body           String
+  segment        String
+  recipientCount Int
+  sentByAdminId  String
+  sentByAdmin    User     @relation(fields: [sentByAdminId], references: [id], onDelete: Cascade)
+  sentAt         DateTime @default(now())
+
+  @@index([sentByAdminId])
+}
+
+model BookSeries {
+  id           String   @id @default(cuid())
+  authorUserId String
+  name         String
+  description  String?
+  books        Book[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([authorUserId])
+}
+
+model BookCoAuthor {
+  id                  String   @id @default(cuid())
+  bookId              String
+  book                Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  authorUserId        String
+  authorUser          User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  royaltySharePercent Float    @default(50.0)
+  status              String   @default("PENDING")
+  createdAt           DateTime @default(now())
+
+  @@unique([bookId, authorUserId])
+  @@index([authorUserId])
+}
+
+model AuthorPreviewLink {
+  id               String               @id @default(cuid())
+  bookSubmissionId String
+  bookSubmission   AuthorBookSubmission @relation(fields: [bookSubmissionId], references: [id], onDelete: Cascade)
+  token            String               @unique
+  expiresAt        DateTime?
+  createdAt        DateTime             @default(now())
+}
+
+model Bundle {
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  description   String?
+  authorUserId  String?
+  bundlePrice   Int
+  coverImageUrl String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  books         BundleBook[]
+
+  @@index([authorUserId])
+}
+
+model BundleBook {
+  id       String @id @default(cuid())
+  bundleId String
+  bundle   Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  bookId   String
+  book     Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, bookId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model BlogPost {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  excerpt       String
+  content       String
+  coverImageUrl String?
+  authorName    String   @default("EbookVala Team")
+  publishedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([publishedAt])
+}
+

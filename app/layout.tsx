@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Providers } from '@/components/Providers';
 import PwaInitializer from '@/components/pwa/PwaInitializer';
 import OfflineIndicator from '@/components/pwa/OfflineIndicator';
@@ -130,6 +131,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+
   return (
     <html lang="en" suppressHydrationWarning className={`dark ${montserrat.variable} ${inter.variable} ${spaceGrotesk.variable} ${eduHand.variable} ${merriweather.variable}`}>
       <head>
@@ -146,6 +150,37 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchemas) }}
         />
+
+        {/* Conditional Google Analytics 4 */}
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}');
+              `}
+            </Script>
+          </>
+        )}
+
+        {/* Conditional Microsoft Clarity */}
+        {clarityId && (
+          <Script id="ms-clarity" strategy="afterInteractive">
+            {`
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${clarityId}");
+            `}
+          </Script>
+        )}
       </head>
       <body className="antialiased min-h-screen bg-theme-bg text-theme-body selection:bg-blue-600 selection:text-white">
         <Providers>
