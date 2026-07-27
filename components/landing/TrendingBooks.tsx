@@ -10,8 +10,6 @@ import { Star, Heart, Eye, ShoppingCart, Sparkles, X, Check, BookOpen } from 'lu
 import { trendingBooks, Book } from '@/data/books';
 import { setScrollLocked } from '@/lib/scroll-lock';
 
-import BookHoverPreview from '@/components/store/BookHoverPreview';
-
 export default function TrendingBooks() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -19,22 +17,6 @@ export default function TrendingBooks() {
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
   const [quickViewBook, setQuickViewBook] = useState<Book | null>(null);
   const [addedToCart, setAddedToCart] = useState<Record<string, boolean>>({});
-  const [hoveredBookId, setHoveredBookId] = useState<string | null>(null);
-  const hoverTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleCardMouseEnter = (id: string) => {
-    hoverTimerRef.current = setTimeout(() => {
-      setHoveredBookId(id);
-    }, 300);
-  };
-
-  const handleCardMouseLeave = () => {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    setHoveredBookId(null);
-  };
 
   // Lock body & Lenis smooth scroll when quick view modal is active
   React.useEffect(() => {
@@ -121,24 +103,13 @@ export default function TrendingBooks() {
             return (
               <motion.div
                 key={book.id}
-                onMouseEnter={() => handleCardMouseEnter(book.id)}
-                onMouseLeave={handleCardMouseLeave}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
                 whileHover={{ y: -6 }}
-                className="rounded-3xl bg-theme-card border border-theme p-4.5 shadow-md hover:shadow-xl glass-card flex flex-col justify-between group relative overflow-visible transition-all duration-300"
+                className="rounded-3xl bg-theme-card border border-theme p-4.5 shadow-md hover:shadow-xl glass-card flex flex-col justify-between group relative overflow-hidden transition-all duration-300"
               >
-                <BookHoverPreview
-                  title={book.title}
-                  authorName={book.author}
-                  categoryName={book.category}
-                  collectionName={book.isBestseller ? 'Bestseller' : 'Trending'}
-                  rating={book.rating}
-                  description={book.description}
-                  isVisible={hoveredBookId === book.id}
-                />
                 <div>
                   {/* Cover Image Container (Proportional 4-column height) */}
                   <div className="relative h-64 sm:h-72 lg:h-80 w-full rounded-2xl overflow-hidden bg-slate-900 mb-4 shadow-md">

@@ -10,7 +10,6 @@ import PriceTag from './PriceTag';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { setScrollLocked } from '@/lib/scroll-lock';
-import BookHoverPreview from './BookHoverPreview';
 
 export interface BookCardData {
   id: string;
@@ -52,22 +51,6 @@ export default function BookCard({ book, onAddToCartSuccess, priorityImage = fal
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-  const hoverTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleMouseEnter = () => {
-    hoverTimerRef.current = setTimeout(() => {
-      setIsPreviewVisible(true);
-    }, 300);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    setIsPreviewVisible(false);
-  };
 
   const handleOpenQuickView = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -113,33 +96,13 @@ export default function BookCard({ book, onAddToCartSuccess, priorityImage = fal
     }
   };
 
-  const collectionTag = book.isBestseller
-    ? 'Bestseller'
-    : book.isFeatured
-    ? 'Featured'
-    : book.isTrending
-    ? 'Trending'
-    : 'Curated Library';
-
   return (
     <>
       <motion.div
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         whileHover={{ y: -8, scale: 1.01 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="group relative flex flex-col justify-between rounded-2xl bg-theme-card border border-theme glass-card overflow-visible shadow-sm hover:shadow-xl hover:border-blue-500/40 transition-all duration-300 h-full"
+        className="group relative flex flex-col justify-between rounded-2xl bg-theme-card border border-theme glass-card overflow-hidden shadow-sm hover:shadow-xl hover:border-blue-500/40 transition-all duration-300 h-full"
       >
-        {/* Floating Preview Card */}
-        <BookHoverPreview
-          title={book.title}
-          authorName={book.author.name}
-          categoryName={book.category.name}
-          collectionName={collectionTag}
-          rating={book.rating}
-          description={book.description}
-          isVisible={isPreviewVisible}
-        />
         {/* Top Badges & Wishlist Heart */}
         <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
           <div className="flex items-center gap-1.5 flex-wrap pointer-events-auto">
