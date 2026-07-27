@@ -20,6 +20,7 @@ import {
   FileCheck,
   Wallet,
   Flag,
+  Trophy,
 } from 'lucide-react';
 import UserRoleBadge from './UserRoleBadge';
 
@@ -45,6 +46,7 @@ const navItems = [
   { href: '/admin/community/reports', label: 'Community Reports', icon: Flag },
   { href: '/admin/community/discussions', label: 'Mod Discussions', icon: MessageSquare },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/gamification', label: 'Gamification & XP', icon: Trophy },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
   { href: '/admin/promo-codes', label: 'Promo Codes', icon: Ticket },

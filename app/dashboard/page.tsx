@@ -5,6 +5,7 @@ import StatCard from '@/components/dashboard/StatCard';
 import ContinueReadingCard from '@/components/dashboard/ContinueReadingCard';
 import ReadingChart from '@/components/dashboard/ReadingChart';
 import BookCard from '@/components/store/BookCard';
+import ReaderDashboardClient from '@/components/dashboard/ReaderDashboardClient';
 import { Library, CheckCircle, Flame, Clock, Sparkles, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
@@ -115,6 +116,9 @@ export default async function DashboardOverviewPage() {
           My Library
         </Link>
       </div>
+
+      {/* Gamification, Daily Bonus & Reading Goal Widget */}
+      <ReaderDashboardClient />
 
       {/* StatCards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

@@ -92,16 +92,6 @@ export default function LoginForm() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Social Google Login */}
-      <SocialLoginButtons />
-
-      {/* Divider */}
-      <div className="relative flex items-center justify-center my-4">
-        <div className="w-full border-t border-theme" />
-        <span className="absolute bg-theme-card px-4 text-xs font-semibold text-theme-muted uppercase tracking-wider">
-          or login with email
-        </span>
-      </div>
 
       {/* Server Feedback Banners */}
       {serverError && (

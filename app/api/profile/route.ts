@@ -121,13 +121,21 @@ export async function PATCH(req: NextRequest) {
     }
 
     // 3. Profile Information Action
-    const { name, bio, image } = updateProfileSchema.parse(body);
+    const { name, bio, image, readingInterests, languagePreference, showOnLeaderboard } = body;
+
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
         name,
         bio,
         image: image !== undefined ? image : user.image,
+        readingInterests: Array.isArray(readingInterests)
+          ? JSON.stringify(readingInterests)
+          : typeof readingInterests === 'string'
+          ? readingInterests
+          : user.readingInterests,
+        languagePreference: typeof languagePreference === 'string' ? languagePreference : user.languagePreference,
+        showOnLeaderboard: typeof showOnLeaderboard === 'boolean' ? showOnLeaderboard : user.showOnLeaderboard,
       },
     });
 
@@ -139,6 +147,9 @@ export async function PATCH(req: NextRequest) {
         email: updatedUser.email,
         image: updatedUser.image,
         bio: updatedUser.bio,
+        readingInterests: updatedUser.readingInterests,
+        languagePreference: updatedUser.languagePreference,
+        showOnLeaderboard: updatedUser.showOnLeaderboard,
       },
     });
   } catch (error: any) {

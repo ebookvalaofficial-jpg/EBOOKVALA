@@ -19,6 +19,7 @@ import {
   ChevronRight,
   LogOut,
   X,
+  Users,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 
@@ -26,13 +27,15 @@ export const dashboardNavItems = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Library', href: '/dashboard/library', icon: BookOpen },
   { label: 'My Cart', href: '/cart', icon: ShoppingCart },
-  { label: 'Wishlist', href: '/wishlist', icon: Heart },
-  { label: 'Highlights & Notes', href: '/dashboard/notes', icon: Highlighter },
-  { label: 'Reading Stats', href: '/dashboard/stats', icon: BarChart3 },
-  { label: 'Challenges', href: '/dashboard/challenges', icon: Trophy },
+  { label: 'Reading Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { label: 'Notes Workspace', href: '/dashboard/notes', icon: Highlighter },
+  { label: 'Reading Goals', href: '/dashboard/goals', icon: Sparkles },
+  { label: 'Leaderboard & XP', href: '/dashboard/leaderboard', icon: Trophy },
+  { label: 'My Reading Groups', href: '/community/clubs', icon: Users },
+  { label: 'Community Discussions', href: '/community/discussions', icon: ShoppingBag },
+  { label: 'Social Activity Feed', href: '/community', icon: Heart },
   { label: 'Browse Store', href: '/books', icon: ShoppingBag },
-  { label: 'AI Assistant', href: '/dashboard/ai', icon: Sparkles },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { label: 'Settings & Profile', href: '/dashboard/settings', icon: Settings },
 ];
 
 interface DashboardSidebarProps {

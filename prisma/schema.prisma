@@ -59,6 +59,19 @@ model User {
   reportsReviewed         Report[]                @relation("AdminReviewedReports")
   authorBookSubmissionCount Int?                @default(0)
   onboardingCompletedAt   DateTime?
+  referralCode            String?                 @unique
+  referredByUserId        String?
+  showOnLeaderboard       Boolean                 @default(true)
+  readingInterests        String?
+  languagePreference      String?                 @default("English")
+  favorites               Favorite[]
+  archivedBooks           ArchivedBook[]
+  collections             Collection[]
+  stickyNotes             StickyNote[]
+  readingGoal             ReadingGoal?
+  xpLogs                  XpLog[]
+  coinLogs                CoinLog[]
+  dailyRewards            DailyReward[]
   createdAt               DateTime                @default(now())
   updatedAt               DateTime                @updatedAt
 }
@@ -156,8 +169,13 @@ model Book {
   isFeatured           Boolean           @default(false)
   isTrending           Boolean           @default(false)
   isDeleted            Boolean           @default(false)
+  deletedAt            DateTime?
   reviews              Review[]
   wishlists            Wishlist[]
+  favorites            Favorite[]
+  archivedBooks        ArchivedBook[]
+  collectionBooks      CollectionBook[]
+  stickyNotes          StickyNote[]
   cartItems            CartItem[]
   orderItems           OrderItem[]
   purchases            Purchase[]
@@ -352,6 +370,7 @@ model Highlight {
   selectedText String
   color        String   @default("YELLOW")
   note         String?
+  isPublic     Boolean  @default(false)
   createdAt    DateTime @default(now())
 }
 
@@ -523,6 +542,7 @@ model AuthorBookSubmission {
   rejectionReason    String?
   submittedAt        DateTime?
   reviewedAt         DateTime?
+  deletedAt          DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -784,4 +804,110 @@ model SiteSetting {
   instagramUrl    String?  @default("https://instagram.com/ebookvala")
   linkedinUrl     String?  @default("https://linkedin.com/company/ebookvala")
   updatedAt       DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════
+// READER DASHBOARD & GAMIFICATION MODELS
+// ═══════════════════════════════════════
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+}
+
+model ArchivedBook {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+}
+
+model Collection {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime         @default(now())
+  books     CollectionBook[]
+}
+
+model CollectionBook {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  bookId       String
+  book         Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([collectionId, bookId])
+}
+
+model StickyNote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String?
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  title     String?
+  content   String
+  color     String   @default("YELLOW")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReadingGoal {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyMinutes Int      @default(30)
+  dailyPages   Int      @default(20)
+  weeklyBooks  Int      @default(1)
+  monthlyBooks Int      @default(2)
+  yearlyBooks  Int      @default(12)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model XpLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CoinLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model DailyReward {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  claimedDate  String
+  xpAwarded    Int      @default(10)
+  coinsAwarded Int      @default(1)
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, claimedDate])
 }

@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Mail, Lock, User, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Mail, Lock, User, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ShieldCheck, BookOpen, Feather, Check } from 'lucide-react';
 import { signupSchema, SignupInput } from '@/lib/validations/auth';
-import SocialLoginButtons from './SocialLoginButtons';
 
 export default function SignupForm() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams?.get('ref') || searchParams?.get('referralCode') || '';
+
   const [formData, setFormData] = useState<SignupInput>({
     name: '',
     email: '',
@@ -15,6 +18,7 @@ export default function SignupForm() {
     terms: false,
   });
 
+  const [intendedRole, setIntendedRole] = useState<'reader' | 'author'>('reader');
   const [errors, setErrors] = useState<{ [key in keyof SignupInput]?: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +27,7 @@ export default function SignupForm() {
     email: string;
     message: string;
     demoVerificationUrl?: string;
+    redirectTo?: string;
   } | null>(null);
 
   // Live Password Strength Calculation
@@ -81,7 +86,11 @@ export default function SignupForm() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          intendedRole,
+          referralCode: refCode || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -94,6 +103,7 @@ export default function SignupForm() {
           email: data.email,
           message: data.message,
           demoVerificationUrl: data.demoVerificationUrl,
+          redirectTo: data.redirectTo,
         });
         setIsLoading(false);
       }
@@ -118,7 +128,7 @@ export default function SignupForm() {
           <p className="text-xs text-theme-muted mt-2 leading-relaxed">
             We sent a verification link to{' '}
             <strong className="text-theme-heading">{registeredSuccess.email}</strong>.
-            Please verify your email address to activate your account and start reading!
+            Please verify your email address to activate your account!
           </p>
         </div>
 
@@ -129,7 +139,7 @@ export default function SignupForm() {
               <ShieldCheck className="w-3.5 h-3.5" /> Local Dev Simulation Shortcut
             </span>
             <p className="text-xs text-theme-muted">
-              Since no external SMTP provider is configured, click the token link below to simulate email verification:
+              Click the token link below to simulate email verification and proceed:
             </p>
             <a
               href={registeredSuccess.demoVerificationUrl}
@@ -142,10 +152,10 @@ export default function SignupForm() {
 
         <div className="pt-4 border-t border-theme flex flex-col gap-3">
           <Link
-            href="/login"
+            href={registeredSuccess.redirectTo || '/login'}
             className="w-full py-3 px-4 font-bold text-sm text-white brand-gradient-bg rounded-xl shadow-lg shadow-blue-500/25 transition-all text-center block"
           >
-            Go to Sign In
+            {intendedRole === 'author' ? 'Continue to Author Application' : 'Go to Sign In'}
           </Link>
         </div>
       </div>
@@ -154,16 +164,13 @@ export default function SignupForm() {
 
   return (
     <div className="w-full space-y-5">
-      {/* Social Google Option */}
-      <SocialLoginButtons />
-
-      {/* Divider */}
-      <div className="relative flex items-center justify-center my-3">
-        <div className="w-full border-t border-theme" />
-        <span className="absolute bg-theme-card px-4 text-xs font-semibold text-theme-muted uppercase tracking-wider">
-          or signup with email
-        </span>
-      </div>
+      {/* Referral Code Banner */}
+      {refCode && (
+        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-primary-blue text-xs font-semibold flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 shrink-0" />
+          <span>Signing up with referral code <strong className="uppercase">{refCode}</strong> (+50 XP Bonus!)</span>
+        </div>
+      )}
 
       {/* Server Error Banner */}
       {serverError && (
@@ -295,6 +302,68 @@ export default function SignupForm() {
           )}
         </div>
 
+        {/* Inline "I WANT TO..." Selector Cards */}
+        <div className="pt-2">
+          <label className="block text-xs font-bold text-theme-heading mb-2 uppercase tracking-wider">
+            I Want To...
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Read Books Option */}
+            <div
+              onClick={() => setIntendedRole('reader')}
+              className={`relative p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                intendedRole === 'reader'
+                  ? 'bg-blue-500/15 border-blue-500 text-white shadow-md shadow-blue-500/10'
+                  : 'bg-slate-800/40 border-slate-700/80 text-slate-400 hover:border-slate-600'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-2 rounded-xl ${intendedRole === 'reader' ? 'bg-blue-600 text-white' : 'bg-slate-700/60 text-slate-300'}`}>
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                {intendedRole === 'reader' && (
+                  <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </span>
+                )}
+              </div>
+              <div>
+                <span className="text-xs font-bold block text-white">Read Books</span>
+                <span className="text-[10px] text-slate-400 leading-tight block mt-0.5">
+                  Discover, read & collect eBooks
+                </span>
+              </div>
+            </div>
+
+            {/* Publish Books Option */}
+            <div
+              onClick={() => setIntendedRole('author')}
+              className={`relative p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                intendedRole === 'author'
+                  ? 'bg-purple-500/15 border-purple-500 text-white shadow-md shadow-purple-500/10'
+                  : 'bg-slate-800/40 border-slate-700/80 text-slate-400 hover:border-slate-600'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-2 rounded-xl ${intendedRole === 'author' ? 'bg-purple-600 text-white' : 'bg-slate-700/60 text-slate-300'}`}>
+                  <Feather className="w-4 h-4" />
+                </div>
+                {intendedRole === 'author' && (
+                  <span className="w-4 h-4 rounded-full bg-purple-500 text-white flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </span>
+                )}
+              </div>
+              <div>
+                <span className="text-xs font-bold block text-white">Publish Books</span>
+                <span className="text-[10px] text-slate-400 leading-tight block mt-0.5">
+                  Publish eBooks & earn royalties
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Terms & Conditions Checkbox */}
         <div className="flex items-start">
           <input
@@ -325,7 +394,7 @@ export default function SignupForm() {
               <span>Creating Account...</span>
             </>
           ) : (
-            <span>Create Account</span>
+            <span>{intendedRole === 'author' ? 'Create Account & Apply as Author' : 'Create Account'}</span>
           )}
         </button>
       </form>
