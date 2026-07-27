@@ -1,7 +1,5 @@
 import NextAuth from 'next-auth';
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/prisma';
 import { loginSchema } from '@/lib/validations/auth';
@@ -9,14 +7,26 @@ import { authConfig } from '../auth.config';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days persistent session
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      },
+    },
+  },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || 'google-client-id-placeholder',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'google-client-secret-placeholder',
-      allowDangerousEmailAccountLinking: true,
-    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -40,6 +50,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             image: true,
             role: true,
             isBanned: true,
+            isAuthor: true,
             emailVerified: true,
           },
         });
@@ -64,6 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           image: user.image,
           role: user.role || 'USER',
           isBanned: user.isBanned,
+          isAuthor: Boolean(user.isAuthor),
           emailVerified: user.emailVerified,
         };
       },
@@ -76,15 +88,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.role = (user as { role?: string }).role || 'USER';
         token.isBanned = Boolean((user as { isBanned?: boolean }).isBanned);
+        token.isAuthor = Boolean((user as { isAuthor?: boolean }).isAuthor);
       } else if (trigger === 'update' && token.id) {
-        // Only query database when explicit session update is triggered
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, isBanned: true, name: true, image: true },
+          select: { role: true, isBanned: true, isAuthor: true, name: true, image: true },
         });
         if (dbUser) {
           token.role = dbUser.role || 'USER';
           token.isBanned = dbUser.isBanned;
+          token.isAuthor = dbUser.isAuthor;
         }
       }
       return authConfig.callbacks!.jwt!({ token, user, trigger, session });

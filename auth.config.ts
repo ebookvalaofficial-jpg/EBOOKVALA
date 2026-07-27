@@ -8,16 +8,18 @@ export const authConfig = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        const u = user as { id?: string; emailVerified?: Date | null; role?: string; isBanned?: boolean };
+        const u = user as { id?: string; emailVerified?: Date | null; role?: string; isBanned?: boolean; isAuthor?: boolean };
         token.id = u.id;
         token.emailVerified = u.emailVerified;
         token.role = u.role || 'USER';
         token.isBanned = Boolean(u.isBanned);
+        token.isAuthor = Boolean(u.isAuthor);
       }
       if (trigger === 'update' && session?.user) {
         token.name = session.user.name;
         token.role = (session.user as { role?: string }).role || token.role;
         token.isBanned = (session.user as { isBanned?: boolean }).isBanned ?? token.isBanned;
+        token.isAuthor = (session.user as { isAuthor?: boolean }).isAuthor ?? token.isAuthor;
       }
       return token;
     },
@@ -26,6 +28,7 @@ export const authConfig = {
         session.user.id = token.id as string;
         session.user.role = (token.role as string) || 'USER';
         session.user.isBanned = Boolean(token.isBanned);
+        (session.user as { isAuthor?: boolean }).isAuthor = Boolean(token.isAuthor);
         (session.user as { emailVerified?: Date | null }).emailVerified = token.emailVerified as Date | null;
       }
       return session;

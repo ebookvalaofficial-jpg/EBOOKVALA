@@ -80,8 +80,7 @@ export default function LoginForm() {
         setIsLoading(false);
       } else {
         setServerSuccess('Signed in successfully! Redirecting...');
-        router.push(callbackUrl);
-        router.refresh();
+        window.location.href = callbackUrl || '/dashboard';
       }
     } catch (err: unknown) {
       console.error('[LOGIN SUBMIT ERROR]:', err);
