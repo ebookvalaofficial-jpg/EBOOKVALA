@@ -166,12 +166,22 @@ function CheckoutContent() {
                 <div className="pt-4 border-t border-theme/60 space-y-2 text-[11px] text-theme-muted">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>256-bit SSL Encrypted Transaction</span>
+                    <span>256-Bit Bank Grade SSL Encrypted Checkout</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Instant digital delivery to your account</span>
+                    <span>Instant Cloud Library Access Post-Payment</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>Zero Hidden Fees — Transparent Indian Rupee Pricing</span>
+                  </div>
+                  <p className="text-[10px] text-theme-muted pt-2 border-t border-theme/40">
+                    Covered by our 14-Day Satisfaction Commitment. Learn more in our{' '}
+                    <Link href="/refund-policy" target="_blank" className="text-primary-blue hover:underline font-bold">
+                      Refund Policy
+                    </Link>.
+                  </p>
                 </div>
               </div>
             </div>

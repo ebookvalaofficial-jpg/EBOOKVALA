@@ -49,6 +49,27 @@ export default async function AuthorEarningsPage() {
         </p>
       </div>
 
+      {/* Educational Royalty Guide */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/60 to-purple-950/60 border border-blue-500/30 glass-card space-y-3">
+        <h3 className="text-sm font-extrabold text-white font-montserrat flex items-center gap-2">
+          💡 How EbookVala Author Royalties Work
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-blue-200">
+          <div className="p-3 rounded-2xl bg-blue-900/30 border border-blue-500/20 space-y-1">
+            <span className="font-bold text-white">💰 70% Flat Split</span>
+            <p className="text-[11px]">You earn 70% of the listed eBook price on every direct reader purchase.</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-blue-900/30 border border-blue-500/20 space-y-1">
+            <span className="font-bold text-white">⏳ 14-Day Holdback</span>
+            <p className="text-[11px]">New earnings stay in &apos;Pending&apos; for 14 days to cover buyer refund requests.</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-blue-900/30 border border-blue-500/20 space-y-1">
+            <span className="font-bold text-white">🏦 Weekly Payouts</span>
+            <p className="text-[11px]">Once your &apos;Payable Balance&apos; reaches ₹500, request instant transfer to your UPI or Bank.</p>
+          </div>
+        </div>
+      </div>
+
       {/* Summary Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="p-6 rounded-3xl bg-theme-card border border-theme glass-card space-y-2 shadow-lg">

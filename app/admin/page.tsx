@@ -29,6 +29,12 @@ export default async function AdminOverviewPage() {
     activeSubsCount,
     pendingRefundsCount,
     recentLogs,
+    pendingAuthorApps,
+    pendingSubmissions,
+    pendingPayouts,
+    stalePayoutsCount,
+    pendingDmcaCount,
+    unreadContactCount,
   ] = await Promise.all([
     prisma.order.findMany({
       where: { status: 'PAID' },
@@ -43,6 +49,17 @@ export default async function AdminOverviewPage() {
       orderBy: { createdAt: 'desc' },
       include: { adminUser: { select: { name: true, email: true } } },
     }),
+    prisma.authorApplication.count({ where: { status: 'PENDING' } }),
+    prisma.authorBookSubmission.count({ where: { status: 'PENDING' } }),
+    prisma.payoutRequest.count({ where: { status: 'PENDING' } }),
+    prisma.payoutRequest.count({
+      where: {
+        status: 'PENDING',
+        createdAt: { lte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      },
+    }),
+    prisma.dmcaRequest.count({ where: { status: 'PENDING' } }),
+    prisma.contactMessage.count({ where: { status: 'UNREAD' } }),
   ]);
 
   const totalRevenuePaise = paidOrders.reduce((sum, o) => sum + o.amount, 0);
@@ -176,6 +193,103 @@ export default async function AdminOverviewPage() {
           colorClass="text-red-500"
           bgClass="bg-red-500/10 border-red-500/20"
         />
+      </div>
+
+      {/* Unified Action Required Widget */}
+      <div className="p-6 rounded-3xl bg-theme-card border border-theme glass-card shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+            <h2 className="text-base font-extrabold text-theme-heading font-montserrat">
+              ⚡ Action Required Right Now
+            </h2>
+          </div>
+          <span className="text-xs text-theme-muted font-bold font-mono">
+            {pendingAuthorApps + pendingSubmissions + pendingPayouts + pendingDmcaCount + unreadContactCount} Items Pending
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <Link
+            href="/admin/applications"
+            className="p-4 rounded-2xl bg-theme-surface border border-theme hover:border-amber-500/50 transition-all flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between text-xs text-theme-muted font-bold">
+              <span>Author Apps</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${pendingAuthorApps > 0 ? 'bg-amber-500/10 text-amber-500 font-extrabold' : 'bg-slate-500/10 text-slate-400'}`}>
+                {pendingAuthorApps}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-theme-heading group-hover:text-amber-500 mt-2">
+              Review Creator Apps →
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/submissions"
+            className="p-4 rounded-2xl bg-theme-surface border border-theme hover:border-blue-500/50 transition-all flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between text-xs text-theme-muted font-bold">
+              <span>Book Submissions</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${pendingSubmissions > 0 ? 'bg-blue-500/10 text-blue-500 font-extrabold' : 'bg-slate-500/10 text-slate-400'}`}>
+                {pendingSubmissions}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-theme-heading group-hover:text-blue-500 mt-2">
+              Approve Manuscripts →
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/payouts"
+            className="p-4 rounded-2xl bg-theme-surface border border-theme hover:border-emerald-500/50 transition-all flex flex-col justify-between group relative"
+          >
+            {stalePayoutsCount > 0 && (
+              <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-black animate-bounce shadow-md">
+                {stalePayoutsCount} STALE 7+ DAYS!
+              </span>
+            )}
+            <div className="flex items-center justify-between text-xs text-theme-muted font-bold">
+              <span>Payout Requests</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${pendingPayouts > 0 ? 'bg-emerald-500/10 text-emerald-500 font-extrabold' : 'bg-slate-500/10 text-slate-400'}`}>
+                {pendingPayouts}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-theme-heading group-hover:text-emerald-500 mt-2">
+              Process Author Funds →
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/dmca"
+            className="p-4 rounded-2xl bg-theme-surface border border-theme hover:border-rose-500/50 transition-all flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between text-xs text-theme-muted font-bold">
+              <span>DMCA Reports</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${pendingDmcaCount > 0 ? 'bg-rose-500/10 text-rose-500 font-extrabold' : 'bg-slate-500/10 text-slate-400'}`}>
+                {pendingDmcaCount}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-theme-heading group-hover:text-rose-500 mt-2">
+              Inspect Notices →
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/contact"
+            className="p-4 rounded-2xl bg-theme-surface border border-theme hover:border-purple-500/50 transition-all flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between text-xs text-theme-muted font-bold">
+              <span>Unread Support</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${unreadContactCount > 0 ? 'bg-purple-500/10 text-purple-500 font-extrabold' : 'bg-slate-500/10 text-slate-400'}`}>
+                {unreadContactCount}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-theme-heading group-hover:text-purple-500 mt-2">
+              View Messages →
+            </p>
+          </Link>
+        </div>
       </div>
 
       {/* Charts Row */}
